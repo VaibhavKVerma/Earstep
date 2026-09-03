@@ -3,7 +3,14 @@ import { audioEngine } from '../../audio/AudioEngine';
 import { INTERVALS, INTERVAL_LEVELS, INTERVAL_REFERENCES, intervalFromSemitones, type IntervalId } from '../../music/intervals';
 import { isCorrectFret, noteAtFret } from '../../music/guitar';
 import { displayNameForNoteName } from '../../music/naming';
-import { formatScientific, humanOctaveName, noteFromName, type NoteName } from '../../music/notes';
+import {
+  formatScientific,
+  humanOctaveName,
+  NATURAL_NAMES,
+  noteFromName,
+  octaveLabel,
+  type NoteName,
+} from '../../music/notes';
 import { PUBLIC_DOMAIN_SONGS, melodyDirection } from '../../music/songs';
 import { completeSession, grantAchievement, recordAnswer, summarizeSession } from '../../persistence/store';
 import { guitarExplanation, octaveExplanation } from '../../training/explanations';
@@ -290,17 +297,27 @@ export function IntervalTraining({ go }: { go: Go }) {
     [allowed, progress.selectedNotes, progress.selectedOctaves, round],
   );
   const [picked, setPicked] = useState<IntervalId | null>(null);
+  const [playing, setPlaying] = useState(false);
   const expected = intervalFromSemitones(question.compareNote!.midi - question.note.midi);
 
   async function playPair() {
-    await audioEngine.playFrequency(question.note.frequency, {
-      instrument: progress.settings.instrument,
-      duration: 0.7,
-    });
-    await audioEngine.playFrequency(question.compareNote!.frequency, {
-      instrument: progress.settings.instrument,
-      duration: 0.9,
-    });
+    setPlaying(true);
+    audioEngine.stop();
+    try {
+      await audioEngine.playFrequency(question.note.frequency, {
+        instrument: progress.settings.instrument,
+        duration: 0.7,
+        awaitEnd: true,
+      });
+      await new Promise((resolve) => window.setTimeout(resolve, 220));
+      await audioEngine.playFrequency(question.compareNote!.frequency, {
+        instrument: progress.settings.instrument,
+        duration: 0.95,
+        awaitEnd: true,
+      });
+    } finally {
+      setPlaying(false);
+    }
   }
 
   function choose(id: IntervalId) {
@@ -312,7 +329,9 @@ export function IntervalTraining({ go }: { go: Go }) {
   return (
     <main className="screen">
       <TopBar title="Intervals" onBack={() => go({ id: 'home' })} />
-      <p className="lede">Level {level}: only a few distances at a time.</p>
+      <p className="lede">
+        Level {level}: you will hear the first note, then the second. Name the distance between them.
+      </p>
       <div className="chip-row">
         {INTERVAL_LEVELS.map((_, i) => (
           <button key={i} type="button" className={`chip ${level === i ? 'active' : ''}`} onClick={() => { setLevel(i); setPicked(null); }}>
@@ -320,7 +339,12 @@ export function IntervalTraining({ go }: { go: Go }) {
           </button>
         ))}
       </div>
-      <PlayButton playing={false} replayed onClick={() => void playPair()} label="Play both notes" />
+      <PlayButton
+        playing={playing}
+        replayed
+        onClick={() => void playPair()}
+        label="Play one, then the other"
+      />
       <div className="choice-grid">
         {allowed.map((id) => {
           const meta = INTERVALS.find((item) => item.id === id);
@@ -463,39 +487,75 @@ export function MelodyTraining({ go }: { go: Go }) {
   );
 }
 
+const SONG_PITCHES = [
+  { id: 'low' as const, octave: 3, title: 'Low' },
+  { id: 'middle' as const, octave: 4, title: 'Middle' },
+  { id: 'high' as const, octave: 5, title: 'High' },
+];
+
 export function SongMode({ go }: { go: Go }) {
   const { progress, update } = useProgress();
   const [songId, setSongId] = useState(PUBLIC_DOMAIN_SONGS[0].id);
   const song = PUBLIC_DOMAIN_SONGS.find((item) => item.id === songId) ?? PUBLIC_DOMAIN_SONGS[0];
-  const [step, setStep] = useState(1);
-  const [message, setMessage] = useState('');
-  const secondDir = melodyDirection(song.notes[0], song.notes[1]);
+  const [noteIndex, setNoteIndex] = useState(0);
+  const [step, setStep] = useState<'name' | 'pitch'>('name');
+  const [selectedName, setSelectedName] = useState<NoteName | null>(null);
+  const [selectedPitch, setSelectedPitch] = useState<'low' | 'middle' | 'high' | null>(null);
+  const [complete, setComplete] = useState(false);
+  const current = song.notes[noteIndex];
+  const total = song.notes.length;
+  const system = progress.settings.noteSystem;
+  const tonic = progress.settings.tonicPitchClass;
+  const currentLabel = displayNameForNoteName(current.name, system, tonic);
+  const guessedLabel = selectedName ? displayNameForNoteName(selectedName, system, tonic) : '';
+  const expectedPitch = octaveLabel(current.octave);
+  const revealed = selectedPitch !== null;
+  const bothCorrect = selectedName === current.name && selectedPitch === expectedPitch;
 
-  async function play(count = song.notes.length) {
+  async function play(through = noteIndex) {
     await audioEngine.playSequence(
-      song.notes.slice(0, count).map((note) => note.frequency),
-      { instrument: progress.settings.instrument, duration: 0.42, gap: 0.08 },
+      song.notes.slice(0, Math.max(1, through + 1)).map((note) => note.frequency),
+      { instrument: progress.settings.instrument, duration: 0.42, gap: 0.1 },
     );
   }
 
-  function markSong() {
-    const summary = summarizeSession(
-      [
-        {
-          questionId: song.id,
-          expected: song.notes[0].name,
-          expectedMidi: song.notes[0].midi,
-          selected: song.notes[0].name,
-          correct: true,
-          firstAttempt: true,
-          replayCount: 0,
-          mode: 'song',
-        },
-      ],
-      [song.notes[0].name],
-      'song',
-    );
-    update((current) => completeSession(current, summary));
+  function resetAnswers() {
+    setStep('name');
+    setSelectedName(null);
+    setSelectedPitch(null);
+  }
+
+  function resetSong(id = songId) {
+    setSongId(id);
+    setNoteIndex(0);
+    setComplete(false);
+    resetAnswers();
+  }
+
+  function next() {
+    if (noteIndex + 1 >= total) {
+      const summary = summarizeSession(
+        [
+          {
+            questionId: song.id,
+            expected: current.name,
+            expectedMidi: current.midi,
+            selected: selectedName ?? current.name,
+            correct: bothCorrect,
+            firstAttempt: bothCorrect,
+            replayCount: 0,
+            mode: 'song',
+          },
+        ],
+        [current.name],
+        'song',
+      );
+      update((currentProgress) => completeSession(currentProgress, summary));
+      setComplete(true);
+      return;
+    }
+    setNoteIndex((n) => n + 1);
+    resetAnswers();
   }
 
   return (
@@ -507,78 +567,116 @@ export function SongMode({ go }: { go: Go }) {
             key={item.id}
             type="button"
             className={`chip ${songId === item.id ? 'active' : ''}`}
-            onClick={() => {
-              setSongId(item.id);
-              setStep(1);
-              setMessage('');
-            }}
+            onClick={() => resetSong(item.id)}
           >
             {item.title}
           </button>
         ))}
       </div>
-      <p className="muted">{song.origin}</p>
-      <PlayButton playing={false} replayed onClick={() => void play(step === 1 ? song.notes.length : 2)} label="Listen" />
+      <p className="muted">
+        {song.origin} · Note {Math.min(noteIndex + 1, total)} of {total}
+      </p>
 
-      {step === 1 && (
+      {!complete && (
         <>
-          <p className="question">What is the starting note?</p>
+          <p className="lede">First name the note. Then choose how high it is.</p>
+          <PlayButton
+            playing={false}
+            replayed
+            onClick={() => void play(noteIndex === 0 && step === 'name' ? total - 1 : noteIndex)}
+            label={noteIndex === 0 ? 'Listen to the phrase' : 'Play up to this note'}
+          />
+        </>
+      )}
+
+      {!complete && step === 'name' && (
+        <>
+          <p className="question">
+            {noteIndex === 0 ? 'What is the first note?' : `What is note ${noteIndex + 1}?`}
+          </p>
           <NoteChoices
-            options={['C', 'D', 'E', 'F', 'G', 'A'] as NoteName[]}
-            system={progress.settings.noteSystem}
-            tonic={progress.settings.tonicPitchClass}
+            options={[...NATURAL_NAMES]}
+            system={system}
+            tonic={tonic}
             onChoose={(name) => {
-              setMessage(name === song.notes[0].name ? `Yes — it starts on ${formatScientific(song.notes[0])}.` : `It starts on ${song.notes[0].name}.`);
-              setStep(2);
+              setSelectedName(name);
+              setStep('pitch');
             }}
           />
         </>
       )}
-      {step === 2 && (
+
+      {!complete && step === 'pitch' && selectedName && (
         <>
-          <p className="question">Does the next note go higher, lower, or stay?</p>
-          <div className="choice-grid">
-            {(['higher', 'lower', 'same'] as const).map((dir) => (
-              <button
-                key={dir}
-                type="button"
-                className="choice"
-                onClick={() => {
-                  setMessage(dir === secondDir ? `Right — it goes ${secondDir}.` : `It goes ${secondDir}.`);
-                  setStep(3);
-                }}
-              >
-                {dir}
-              </button>
-            ))}
+          <p className="question">
+            You chose {guessedLabel}. What pitch did you hear?
+          </p>
+          <div className="choice-grid" role="group" aria-label="Pitch">
+            {SONG_PITCHES.map((pitch, index) => {
+              const state = !revealed
+                ? ''
+                : pitch.id === expectedPitch
+                  ? 'correct'
+                  : pitch.id === selectedPitch
+                    ? 'wrong'
+                    : '';
+              return (
+                <button
+                  key={pitch.id}
+                  type="button"
+                  className={`choice ${state}`}
+                  disabled={revealed}
+                  onClick={() => setSelectedPitch(pitch.id)}
+                >
+                  <span className="choice-key">{index + 1}</span>
+                  {pitch.title} {guessedLabel}
+                  <small>
+                    {guessedLabel}
+                    {pitch.octave}
+                  </small>
+                </button>
+              );
+            })}
           </div>
+          {!revealed && (
+            <button type="button" className="ghost" onClick={resetAnswers}>
+              Change note
+            </button>
+          )}
         </>
       )}
-      {step === 3 && (
-        <>
-          <p className="question">Name the second note, then find the first on guitar.</p>
-          <NoteChoices
-            options={['C', 'D', 'E', 'F', 'G', 'A'] as NoteName[]}
-            system={progress.settings.noteSystem}
-            tonic={progress.settings.tonicPitchClass}
-            onChoose={(name) => {
-              setMessage(`Second note is ${song.notes[1].name}. You chose ${name}.`);
-              setStep(4);
-              markSong();
-            }}
-          />
-        </>
-      )}
-      {step === 4 && (
-        <>
-          <p>Find {formatScientific(song.notes[0])} on the fretboard.</p>
-          <Fretboard target={song.notes[0]} highlight="octave" showNames noteSystem={progress.settings.noteSystem} tonic={progress.settings.tonicPitchClass} />
-          <button type="button" className="primary" onClick={() => go({ id: 'home' })}>
-            Done
+
+      {revealed && !complete && (
+        <section className={`feedback ${bothCorrect ? 'ok' : 'bad'}`}>
+          <p className="feedback-kicker">{bothCorrect ? 'Correct!' : 'Not quite.'}</p>
+          <h2>
+            You heard {currentLabel}
+            {current.octave} · {humanOctaveName(current)}
+          </h2>
+          <p>
+            Note: {selectedName === current.name ? `${currentLabel} is right.` : `You picked ${guessedLabel}; it is ${currentLabel}.`}{' '}
+            Pitch: {selectedPitch === expectedPitch ? `${SONG_PITCHES.find((p) => p.id === expectedPitch)?.title} is right.` : `It is ${SONG_PITCHES.find((p) => p.id === expectedPitch)?.title}.`}
+          </p>
+          <button type="button" className="primary" onClick={next}>
+            {noteIndex + 1 >= total ? 'See the full phrase' : 'Next note'}
           </button>
-        </>
+        </section>
       )}
-      {message && <p className="lede">{message}</p>}
+
+      {complete && (
+        <section className="feedback ok">
+          <h2>You figured out the phrase.</h2>
+          <p>{song.notes.map((note) => formatScientific(note)).join(' → ')}</p>
+          <div className="row wrap">
+            <button type="button" className="primary" onClick={() => resetSong()}>
+              Practice this phrase again
+            </button>
+            <button type="button" className="ghost" onClick={() => go({ id: 'home' })}>
+              Home
+            </button>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

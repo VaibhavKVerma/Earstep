@@ -15,6 +15,8 @@ export interface PlayOptions {
   slower?: boolean;
   louder?: boolean;
   soundSource?: SoundSource;
+  /** Wait until the note has finished sounding before resolving. */
+  awaitEnd?: boolean;
 }
 
 const DEFAULT_DURATION: Record<InstrumentId, number> = {
@@ -112,17 +114,22 @@ export class AudioEngine {
     window.setTimeout(() => {
       voice.disconnect();
     }, (duration + 0.3) * 1000);
+
+    if (options.awaitEnd) {
+      await wait(duration * 1000);
+    }
   }
 
   async playSequence(
     frequencies: number[],
     options: PlayOptions & { gap?: number } = {},
   ): Promise<void> {
+    this.stop();
     const gap = options.gap ?? 0.12;
     const noteDuration = options.duration ?? 0.55;
     for (const frequency of frequencies) {
-      await this.playFrequency(frequency, { ...options, duration: noteDuration });
-      await wait((noteDuration + gap) * 1000);
+      await this.playFrequency(frequency, { ...options, duration: noteDuration, awaitEnd: true });
+      await wait(gap * 1000);
     }
   }
 

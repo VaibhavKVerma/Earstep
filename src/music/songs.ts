@@ -40,6 +40,12 @@ export const PUBLIC_DOMAIN_SONGS: SongPhrase[] = [
     origin: 'Traditional exercise',
     notes: phrase(['C4', 'D4', 'E4', 'F4', 'G4', 'F4', 'E4', 'D4', 'C4']),
   },
+  {
+    id: 'jingle',
+    title: 'Jingle Bells',
+    origin: 'Public domain',
+    notes: phrase(['E4', 'E4', 'E4', 'E4', 'E4', 'E4', 'E4', 'G4', 'C4', 'D4', 'E4']),
+  }
 ];
 
 export function melodyDirection(

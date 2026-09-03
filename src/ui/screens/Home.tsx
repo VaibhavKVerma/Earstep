@@ -15,7 +15,7 @@ const MODES: { id: PracticeMode | 'custom'; title: string; text: string; screen:
   { id: 'guitar', title: 'Find it on guitar', text: 'Hear it, then tap a fret.', screen: { id: 'guitar-find' } },
   { id: 'interval', title: 'Intervals', text: 'How far apart are two notes?', screen: { id: 'intervals' } },
   { id: 'melody', title: 'Melodies', text: 'Follow a short phrase.', screen: { id: 'melody' } },
-  { id: 'song', title: 'Learn from songs', text: 'Public-domain phrases, step by step.', screen: { id: 'song' } },
+  { id: 'song', title: 'Learn from songs', text: 'Name each note, then pick Low, Middle, or High.', screen: { id: 'song' } },
   { id: 'hear-sing-find', title: 'Hear → Sing → Find', text: 'Listen, hum, then find it.', screen: { id: 'hear-sing-find' } },
 ];
 

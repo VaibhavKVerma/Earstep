@@ -213,7 +213,7 @@ export const LESSONS: Lesson[] = [
     pages: [
       {
         heading: 'Song detective',
-        body: 'Listen. Find the starting note. Ask whether the next note goes higher or lower. Then name the distance, then the note, then find it on guitar. Repeat. That is the whole craft.',
+        body: 'Listen to the phrase. For each sound, name the note from all seven letters, then choose its pitch — Low, Middle, or High. Repeat until the phrase is clear.',
       },
     ],
   },
