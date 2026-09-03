@@ -1,0 +1,10 @@
+Recorded instrument samples are FluidR3 GM renderings packaged by
+midi-js-soundfonts (https://github.com/gleitz/midi-js-soundfonts).
+
+Instruments used:
+- acoustic_guitar_steel
+- electric_guitar_clean
+- acoustic_grand_piano
+
+FluidR3 GM is available under the MIT License.
+Sine-wave tones in the app are still generated in the browser.
