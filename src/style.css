@@ -126,6 +126,32 @@ p {
   padding-bottom: 32px;
 }
 
+.ad-slot {
+  width: var(--screen);
+  margin: 0 auto 12px;
+  padding: 0 var(--pad);
+  min-height: 90px;
+}
+
+.ad-slot-placeholder {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  min-height: 100px;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.ad-slot-placeholder small {
+  display: block;
+  max-width: 28rem;
+  padding: 0 12px 8px;
+}
+
 .site-footer {
   width: var(--screen);
   margin: 0 auto;
@@ -140,7 +166,8 @@ p {
   margin: 0 0 0.35rem;
 }
 
-.site-footer a {
+.site-footer a,
+.stack a {
   color: var(--gold);
   font-weight: 700;
   word-break: break-word;

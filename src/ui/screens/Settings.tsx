@@ -8,6 +8,7 @@ import {
   type NoteSystem,
 } from '../../music/naming';
 import { resetProgress, useProgress } from '../context/ProgressContext';
+import { adsConfigured } from '../../ads/config';
 import { Chip, TopBar } from '../components/widgets';
 import type { Go } from '../nav';
 
@@ -179,6 +180,19 @@ export function Settings({ go }: { go: Go }) {
         >
           Play a reference middle C
         </button>
+
+        <h2>Ads</h2>
+        <p className="muted">
+          Banners stay off listening and quiz screens. Your AdSense publisher ID is already on the
+          site. After Google approves Earstep, create a display ad unit and put the slot ID in{' '}
+          <code>src/ads/config.ts</code> as <code>MANUAL_SLOT</code>, then redeploy. See the{' '}
+          <a href="/privacy.html">privacy page</a>.
+        </p>
+        <p className="muted">
+          {adsConfigured
+            ? 'Ad IDs are set. Banners can load on Home, Lessons, Stats, Settings, and session complete.'
+            : 'Waiting for an ad slot ID. The verification tag is in place; banners stay hidden until the slot is added.'}
+        </p>
 
         <button
           type="button"

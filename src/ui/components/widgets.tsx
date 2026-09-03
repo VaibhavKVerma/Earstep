@@ -139,6 +139,9 @@ export function SiteFooter() {
         If you need enhancements or corrections, please drop an email to{' '}
         <a href="mailto:vaibhavverma15062001@gmail.com">vaibhavverma15062001@gmail.com</a>
       </p>
+      <p>
+        <a href="/privacy.html">Privacy</a>
+      </p>
     </footer>
   );
 }
