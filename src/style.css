@@ -126,6 +126,21 @@ p {
   padding-bottom: 32px;
 }
 
+.seo-guide {
+  margin-top: 36px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.seo-guide h2 {
+  font-size: 1.2rem;
+}
+
+.seo-guide a {
+  color: var(--gold);
+  font-weight: 700;
+}
+
 .ad-slot {
   width: var(--screen);
   margin: 0 auto 12px;

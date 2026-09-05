@@ -140,6 +140,12 @@ export function SiteFooter() {
         <a href="mailto:vaibhavverma15062001@gmail.com">vaibhavverma15062001@gmail.com</a>
       </p>
       <p>
+        <a href="/ear-training.html">Ear training</a>
+        {' · '}
+        <a href="/guitar-ear-training.html">Guitar ear training</a>
+        {' · '}
+        <a href="/learn-notes.html">Learn notes</a>
+        {' · '}
         <a href="/privacy.html">Privacy</a>
       </p>
     </footer>

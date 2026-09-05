@@ -14,16 +14,30 @@ export function Welcome({ go }: { go: Go }) {
         <span />
       </div>
       <div className="wood-rule" aria-hidden="true" />
-      <p className="eyebrow">Earstep</p>
-      <h1>Learn to hear musical notes.</h1>
+      <p className="eyebrow">Free guitar ear training</p>
+      <h1>Hear a note. Name it.</h1>
       <p className="lede">
-        Start with just two notes. Add more as you improve. Built for beginners — especially guitar
-        players — who want to figure out melodies by ear.
+        Learn notes by ear, starting with C vs D. Built for beginners who want to learn guitar
+        and figure out songs without dumping all twelve notes on day one.
       </p>
       <button type="button" className="primary xl" onClick={() => go({ id: 'onboarding' })}>
-        Start
+        Start ear training
       </button>
       <p className="fine">No account needed. Progress stays on this device.</p>
+      <article className="seo-guide">
+        <h2>Ear training, one pair at a time</h2>
+        <p>
+          Earstep is music learning through listening: we play a note, you name it, then you can
+          find it on guitar. That is guitar ear training and note training in the same place.
+        </p>
+        <p>
+          <a href="/ear-training.html">What is ear training?</a>
+          {' · '}
+          <a href="/guitar-ear-training.html">Learn guitar by ear</a>
+          {' · '}
+          <a href="/learn-notes.html">Learn musical notes</a>
+        </p>
+      </article>
     </main>
   );
 }
