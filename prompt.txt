@@ -1,0 +1,1631 @@
+# Build a Beginner-Friendly Musical Ear Training Web App
+
+Build a polished, responsive web application for **beginner musicians to learn to identify musical notes by ear**, with a particular focus on guitar players.
+
+The core philosophy of the application is:
+
+> **Do not overwhelm beginners with all 7 or 12 notes at once. Introduce notes progressively, allow the learner to choose exactly which notes they are practicing, train the same note across different octaves/pitches, and gradually transition from isolated notes to real musical contexts and songs.**
+
+The application should feel like a combination of **Duolingo + a musical ear trainer**, with progression, repetition, statistics, difficulty levels, and practical musical application.
+
+---
+
+# 1. Target User
+
+The primary user is a complete beginner who:
+
+* Plays or is learning guitar
+* Wants to recognize notes by ear
+* Wants to eventually hear a song and figure out its melody on guitar
+* Does not yet have strong relative pitch
+* Finds traditional ear-training websites overwhelming because they immediately include all 7 or 12 notes
+* Wants to start with only two notes, for example:
+
+  * C vs D
+  * then C vs D vs E
+  * then C/D/E/F
+  * etc.
+
+The app should support other instruments eventually, but **guitar should be the primary instrument**.
+
+---
+
+# 2. Core Learning Concept
+
+The application should teach several related skills separately.
+
+### Skill A — Note Identity
+
+Example:
+
+Play either C or D.
+
+Question:
+
+> "Which note did you hear?"
+
+Options:
+
+* C
+* D
+
+The user should not see all 12 notes.
+
+The learner controls exactly which notes are currently active.
+
+---
+
+### Skill B — Pitch / Octave Recognition
+
+The same note can occur at different pitches.
+
+For example:
+
+* C2
+* C3
+* C4
+* C5
+
+These are all **C**, but they are different octaves.
+
+The app should explicitly teach:
+
+> "Same note, different octave."
+
+Initially, octave should NOT matter.
+
+For example:
+
+C2 → answer: C
+
+C4 → answer: C
+
+C5 → answer: C
+
+Later, introduce octave recognition as a separate skill.
+
+---
+
+### Skill C — Relative Pitch
+
+Eventually teach:
+
+> "How far apart are these two notes?"
+
+For example:
+
+C → D = Major 2nd
+
+C → E = Major 3rd
+
+C → G = Perfect 5th
+
+This should be introduced only after the user has developed basic note recognition.
+
+---
+
+### Skill D — Scale Degrees
+
+Introduce:
+
+C major:
+
+C = Sa / Do
+D = Re
+E = Ga
+F = Ma
+G = Pa
+A = Dha
+B = Ni
+
+The learner should eventually be able to hear:
+
+> Sa → Ga → Ma → Ga → Re
+
+rather than only thinking in absolute note names.
+
+This is particularly useful for Indian music.
+
+Allow users to switch between:
+
+* Western note names
+* Solfège
+* Indian sargam
+
+For example:
+
+C = Sa = Do
+D = Re = Re
+E = Ga = Mi
+F = Ma = Fa
+G = Pa = Sol
+A = Dha = La
+B = Ni = Ti
+
+Do not force this terminology on the user; make it configurable.
+
+---
+
+# 3. Progressive Learning System
+
+This is the most important feature.
+
+Never force a beginner to practice all notes.
+
+Create a progression system.
+
+### Stage 1
+
+Two notes:
+
+C vs D
+
+### Stage 2
+
+Three notes:
+
+C vs D vs E
+
+### Stage 3
+
+Four notes:
+
+C vs D vs E vs F
+
+### Stage 4
+
+Five notes:
+
+C vs D vs E vs F vs G
+
+### Stage 5
+
+Six notes:
+
+C through A
+
+### Stage 6
+
+Seven natural notes:
+
+C D E F G A B
+
+### Stage 7
+
+Chromatic notes:
+
+C C# D D# E F F# G G# A A# B
+
+### Stage 8
+
+Different octaves.
+
+### Stage 9
+
+Random notes across multiple octaves.
+
+### Stage 10
+
+Intervals.
+
+### Stage 11
+
+Melodies.
+
+### Stage 12
+
+Real songs.
+
+However, progression should NOT be strictly linear.
+
+Allow users to manually configure the notes they want.
+
+Example:
+
+> Practice Notes
+
+☑ C
+☑ D
+☐ E
+☐ F
+☐ G
+☐ A
+☐ B
+
+The user can therefore create:
+
+> "C vs D training"
+
+whenever they want.
+
+---
+
+# 4. Difficulty Levels
+
+Each exercise should have difficulty settings.
+
+## Beginner
+
+* 2 notes
+* Same octave
+* Long notes
+* Clear instrument sound
+* No background music
+* Unlimited time
+
+Example:
+
+🎵 C
+
+Options:
+
+C | D
+
+---
+
+## Easy
+
+* 2–3 notes
+* Different octaves
+* Slightly shorter notes
+
+---
+
+## Medium
+
+* 3–5 notes
+* Different octaves
+* Random order
+* Different note durations
+
+---
+
+## Hard
+
+* 7 natural notes
+* Multiple octaves
+* Short notes
+* Random instrument sounds
+
+---
+
+## Expert
+
+* 12 chromatic notes
+* Multiple octaves
+* Very short notes
+* Similar neighboring pitches
+* Notes embedded inside musical phrases
+
+---
+
+# 5. Main Training Screen
+
+Create a beautiful, minimal training interface.
+
+Top:
+
+> C vs D
+
+Progress:
+
+> Question 7 / 20
+
+Large central button:
+
+### 🔊 PLAY NOTE
+
+When clicked:
+
+* Play the note
+* Show a replay button
+* Do NOT immediately show the answer
+
+Below:
+
+> What note did you hear?
+
+Buttons:
+
+**C** | **D**
+
+After selecting:
+
+Show:
+
+> Correct!
+
+or:
+
+> Not quite.
+
+Then show:
+
+> You heard: C4
+
+and optionally:
+
+> You answered: D
+
+Then provide a short explanation.
+
+Example:
+
+> C4 and C5 are both C.
+> The difference is their octave.
+
+Then:
+
+> NEXT
+
+---
+
+# 6. Replay Feature
+
+Allow the user to replay the note.
+
+Options:
+
+* Replay
+* Play louder
+* Play slower
+
+Do not penalize replaying.
+
+The purpose is learning, not testing.
+
+Track:
+
+* First-answer accuracy
+* Accuracy after replay
+* Number of attempts
+
+---
+
+# 7. Guitar Mode
+
+This is extremely important.
+
+Allow the user to select:
+
+> Instrument: Guitar
+
+The generated note should sound like an actual guitar note rather than only piano.
+
+Initially support:
+
+* Acoustic guitar
+* Electric guitar
+* Piano
+* Sine wave
+
+Default:
+
+> Acoustic guitar
+
+Later allow additional instruments.
+
+---
+
+# 8. Guitar Fretboard Integration
+
+After the user answers a note, optionally show a guitar fretboard.
+
+Example:
+
+Answer:
+
+> G
+
+Show:
+
+* 6th string, 3rd fret
+* 5th string, 10th fret
+* 4th string, 5th fret
+* 3rd string, open
+* 2nd string, 8th fret
+* 1st string, 3rd fret
+
+Highlight the positions corresponding to the played octave.
+
+The user should learn:
+
+> Hear G → recognize G → understand where G exists on guitar.
+
+Add a button:
+
+> "Show me on guitar"
+
+---
+
+# 9. Same Note, Different Pitch Training
+
+Create a dedicated lesson:
+
+## "One Note, Many Pitches"
+
+Example:
+
+Play:
+
+C2
+
+Then:
+
+C3
+
+Then:
+
+C4
+
+Then:
+
+C5
+
+Explain:
+
+> These are all C.
+
+Then quiz:
+
+🎵 C4
+
+Options:
+
+C | D | E
+
+Answer:
+
+C
+
+Then later:
+
+🎵 C3
+
+Question:
+
+> Is this the same note as the previous C?
+
+Yes / No
+
+This should teach the concept of **pitch class vs octave**.
+
+---
+
+# 10. Octave Training
+
+Once the user is comfortable identifying note names, introduce octave recognition.
+
+Example:
+
+Play C3.
+
+Question:
+
+> Which C did you hear?
+
+Options:
+
+C3
+C4
+C5
+
+Use visual indicators such as:
+
+Low / Middle / High initially.
+
+Do not assume beginners understand scientific pitch notation.
+
+First teach:
+
+> Low C
+> Middle C
+> High C
+
+Then optionally display:
+
+> C3 / C4 / C5
+
+---
+
+# 11. "Find It On Guitar" Mode
+
+Create another exercise type.
+
+The app plays:
+
+🎵 G
+
+Then asks:
+
+> Find this note on your guitar.
+
+Show a fretboard.
+
+The user clicks a fret.
+
+Example:
+
+6th string → 3rd fret
+
+App responds:
+
+> Correct!
+
+or:
+
+> That's G#.
+
+This connects hearing with physical guitar knowledge.
+
+Allow multiple correct positions.
+
+Example:
+
+If the target is G3, several guitar positions may contain G3.
+
+Explain why.
+
+---
+
+# 12. Ear → Voice → Guitar Exercise
+
+Create a special exercise called:
+
+## "Hear → Sing → Find"
+
+Step 1:
+
+Play a note.
+
+Step 2:
+
+Ask the user to sing/hum the note.
+
+Step 3:
+
+Ask them to find it on guitar.
+
+The app cannot perfectly judge singing initially, so make the singing step optional.
+
+Potential future feature:
+
+Use microphone pitch detection to determine whether the user is singing approximately the correct pitch.
+
+Display:
+
+> Target: G4
+> Your pitch: G4
+
+or:
+
+> Try singing slightly higher.
+
+This feature should be modular and optional.
+
+---
+
+# 13. Relative Pitch Training
+
+After note recognition becomes comfortable, introduce interval training.
+
+Start with:
+
+* Same note
+* Minor 2nd
+* Major 2nd
+* Minor 3rd
+* Major 3rd
+* Perfect 4th
+* Perfect 5th
+* Octave
+
+Do NOT introduce every interval simultaneously.
+
+Progress:
+
+### Level 1
+
+Same vs different
+
+### Level 2
+
+Unison vs Major 2nd
+
+### Level 3
+
+Major 2nd vs Major 3rd
+
+### Level 4
+
+Major 2nd / Major 3rd / Perfect 4th
+
+etc.
+
+Use musical examples and memorable references where appropriate.
+
+---
+
+# 14. Melody Training
+
+Once basic note recognition is established, introduce short melodies.
+
+Example:
+
+Play:
+
+C → D → E → D
+
+Ask the user to reproduce it.
+
+Possible modes:
+
+### Identify
+
+"What was the first note?"
+
+### Direction
+
+"Did the melody go higher or lower?"
+
+### Note sequence
+
+"Which sequence did you hear?"
+
+C D E D
+
+C E D C
+
+D E F E
+
+### Reproduce
+
+Show a virtual guitar/piano keyboard and let the user reproduce the melody.
+
+---
+
+# 15. Song Mode
+
+This is the ultimate goal.
+
+Create a section:
+
+# Learn From Songs
+
+Use simple melodies first.
+
+Examples:
+
+* Happy Birthday
+* Twinkle Twinkle Little Star
+* Ode to Joy
+* simple folk melodies
+* simple Indian melodies
+
+Eventually add popular songs, but do not ship copyrighted melody transcriptions unless legally permitted.
+
+The app can instead allow the user to enter/import their own songs or use public-domain melodies.
+
+The lesson structure:
+
+### Step 1
+
+Listen to the melody.
+
+### Step 2
+
+Find the starting note.
+
+### Step 3
+
+Identify whether the next note goes:
+
+* Higher
+* Lower
+* Same
+
+### Step 4
+
+Identify the interval.
+
+### Step 5
+
+Identify the exact note.
+
+### Step 6
+
+Find the note on guitar.
+
+This should teach the actual skill of figuring songs out by ear.
+
+---
+
+# 16. Sargam / Indian Music Mode
+
+Provide a toggle:
+
+> Note system
+
+* Western
+* Solfège
+* Indian Sargam
+
+Example:
+
+Western:
+
+C D E F G A B
+
+Sargam:
+
+Sa Re Ga Ma Pa Dha Ni
+
+Allow the user to select their tonic.
+
+Example:
+
+> Sa = C
+
+or:
+
+> Sa = D
+
+Then dynamically map all notes.
+
+This is extremely important because the user may eventually want to figure out Indian songs by ear.
+
+---
+
+# 17. Tonic / Key Training
+
+Introduce the concept of tonic.
+
+Example:
+
+If:
+
+> Sa = C
+
+then:
+
+C = Sa
+D = Re
+E = Ga
+F = Ma
+G = Pa
+A = Dha
+B = Ni
+
+If:
+
+> Sa = D
+
+then:
+
+D = Sa
+E = Re
+F# = Ga
+G = Ma
+A = Pa
+B = Dha
+C# = Ni
+
+Teach that melodies can move to different keys while preserving their relative relationships.
+
+---
+
+# 18. Statistics
+
+Track useful statistics.
+
+Dashboard:
+
+### Note Recognition
+
+Accuracy:
+
+C — 94%
+D — 87%
+E — 71%
+F — 62%
+
+### Strongest Notes
+
+C
+G
+D
+
+### Weakest Notes
+
+F
+B
+
+### Octave Recognition
+
+72%
+
+### First Attempt Accuracy
+
+81%
+
+### Current streak
+
+7 days
+
+Avoid creating pressure around streaks. The primary goal is learning.
+
+---
+
+# 19. Intelligent Adaptive Difficulty
+
+The application should automatically adapt.
+
+Example:
+
+If:
+
+C = 95%
+D = 92%
+
+Then suggest:
+
+> "You're ready to add E."
+
+If:
+
+C = 96%
+D = 94%
+E = 58%
+
+Then recommend:
+
+> "Keep practicing C, D and E."
+
+Do not add new notes just because the user completed a fixed number of questions.
+
+Use accuracy thresholds.
+
+Example:
+
+* <60% → stay at current level
+* 60–80% → continue
+* > 80% → recommend next note
+* > 90% → allow next difficulty
+
+Make thresholds configurable.
+
+---
+
+# 20. Mistake Review
+
+After a session, show:
+
+> Notes you struggled with
+
+Example:
+
+D — 6 mistakes
+E — 4 mistakes
+
+Then provide:
+
+> Practice weak notes
+
+This starts a focused session containing primarily the notes the user struggles with.
+
+---
+
+# 21. Daily Practice
+
+Create:
+
+## Daily Training
+
+A 10-minute session.
+
+Example:
+
+### 2 min
+
+C vs D
+
+### 2 min
+
+C vs D vs E
+
+### 2 min
+
+Different octaves
+
+### 2 min
+
+Guitar fretboard
+
+### 2 min
+
+Simple melody
+
+At the end:
+
+> Today's accuracy: 78%
+
+> Recommended tomorrow: C / D / E
+
+---
+
+# 22. Lessons
+
+Create structured beginner lessons.
+
+### Lesson 1
+
+What is a musical note?
+
+### Lesson 2
+
+C vs D
+
+### Lesson 3
+
+C vs D vs E
+
+### Lesson 4
+
+Adding F
+
+### Lesson 5
+
+Adding G
+
+### Lesson 6
+
+All natural notes
+
+### Lesson 7
+
+Same note, different octave
+
+### Lesson 8
+
+Finding notes on guitar
+
+### Lesson 9
+
+Higher vs lower
+
+### Lesson 10
+
+Intervals
+
+### Lesson 11
+
+Sa/Re/Ga/Ma
+
+### Lesson 12
+
+Simple melodies
+
+### Lesson 13
+
+Figuring out songs
+
+The user should be able to skip lessons if they want.
+
+---
+
+# 23. Audio Engine
+
+Implement a robust audio engine using the Web Audio API or another appropriate browser audio technology.
+
+Requirements:
+
+* Accurate frequencies
+* Multiple octaves
+* Multiple instruments where possible
+* Adjustable volume
+* Adjustable note duration
+* Low latency
+* Replay
+* No clipping
+* Consistent tuning
+
+Use standard tuning:
+
+A4 = 440 Hz
+
+Support configurable tuning later.
+
+---
+
+# 24. Frequency / Note Data Model
+
+Represent notes using:
+
+* Note name
+* Pitch class
+* Octave
+* Frequency
+* MIDI note number
+
+Example:
+
+C4:
+
+note = C
+pitchClass = 0
+octave = 4
+midi = 60
+frequency ≈ 261.63 Hz
+
+C5:
+
+note = C
+pitchClass = 0
+octave = 5
+midi = 72
+frequency ≈ 523.25 Hz
+
+This distinction is critical.
+
+The application should treat:
+
+C4 and C5 as:
+
+> same pitch class
+
+but:
+
+> different absolute pitches.
+
+---
+
+# 25. Guitar Tuning
+
+Default:
+
+Standard tuning:
+
+6th string = E2
+5th string = A2
+4th string = D3
+3rd string = G3
+2nd string = B3
+1st string = E4
+
+Support fretboard calculations dynamically.
+
+Do not hard-code individual note positions.
+
+Calculate notes from:
+
+* string tuning
+* fret number
+* semitone offset
+
+Later support alternate tunings.
+
+---
+
+# 26. Practice Modes
+
+Create a central Practice screen with:
+
+### Note Recognition
+
+Hear → identify note.
+
+### Note + Octave
+
+Hear → identify note and octave.
+
+### Guitar Fretboard
+
+Hear → find note.
+
+### Higher or Lower
+
+Compare two notes.
+
+### Interval
+
+Hear two notes → identify interval.
+
+### Melody
+
+Hear melody → reproduce/identify.
+
+### Song
+
+Practice extracting melodies from musical phrases.
+
+---
+
+# 27. Custom Practice
+
+Allow users to configure everything.
+
+Example:
+
+### Notes
+
+☑ C
+☑ D
+☐ E
+☐ F
+☐ G
+☐ A
+☐ B
+
+### Octaves
+
+☑ 3
+☑ 4
+☐ 5
+
+### Instrument
+
+🎸 Acoustic Guitar
+
+### Questions
+
+20
+
+### Difficulty
+
+Beginner
+
+### Mode
+
+Note Recognition
+
+Button:
+
+> START PRACTICE
+
+This should be one of the primary features.
+
+---
+
+# 28. Gamification
+
+Keep gamification subtle.
+
+Use:
+
+* XP
+* Levels
+* Practice streak
+* Accuracy
+* Achievements
+
+Example achievements:
+
+> First 10 correct notes
+
+> 90% accuracy with C/D
+
+> Mastered all natural notes
+
+> Identified 100 notes
+
+> First melody figured out by ear
+
+Do not make the application feel like an arcade game. The primary purpose is skill development.
+
+---
+
+# 29. UI / UX
+
+Design should be:
+
+* Minimal
+* Modern
+* Clean
+* Music-focused
+* Beginner-friendly
+* Responsive
+* Mobile-friendly
+* Desktop-friendly
+
+Avoid clutter.
+
+The training screen should focus attention on:
+
+1. The audio button
+2. The question
+3. Answer choices
+4. Progress
+
+Use large buttons.
+
+Do not display unnecessary music theory while the user is answering.
+
+Show explanations after answering.
+
+---
+
+# 30. Visual Guitar Fretboard
+
+Build an interactive fretboard.
+
+Requirements:
+
+* 6 strings
+* At least 15–24 frets
+* Standard tuning
+* Note names can be toggled
+* Highlight target notes
+* Clickable frets
+* Different octave notes visually distinguishable
+* Toggle:
+
+  * Show all notes
+  * Hide notes
+  * Show only target note
+
+Example:
+
+Target:
+
+> G
+
+Fretboard highlights all G positions.
+
+Then:
+
+> Target: G4
+
+Only positions containing G4 are highlighted.
+
+---
+
+# 31. Learning Explanations
+
+Keep explanations short and beginner-friendly.
+
+Example:
+
+> **Correct — that's C.**
+
+> C can appear in several places on the guitar. Those notes may have different octaves, but they are all the note C.
+
+Another:
+
+> **You chose D.**
+
+> The note was C4.
+
+> Don't worry about the octave yet. First learn to recognize the note itself.
+
+---
+
+# 32. Accessibility
+
+Support:
+
+* Keyboard controls
+* Large buttons
+* Dark/light mode
+* Volume control
+* Visual feedback
+* Screen-reader friendly labels
+* Color should never be the only indication of correct/incorrect answers
+
+---
+
+# 33. Data Persistence
+
+Save user progress locally initially using localStorage or IndexedDB.
+
+Persist:
+
+* Completed lessons
+* Accuracy per note
+* Accuracy per octave
+* Practice history
+* Preferred instrument
+* Selected note sets
+* Sargam settings
+* Current level
+* Streak
+
+Design the data layer so a backend can be added later.
+
+---
+
+# 34. No Login Required Initially
+
+The first version should work without authentication.
+
+User opens the website and immediately starts practicing.
+
+Later architecture can support:
+
+* Accounts
+* Cloud synchronization
+* Leaderboards
+* Cross-device progress
+
+but these should not be required for MVP.
+
+---
+
+# 35. MVP Scope
+
+Do NOT attempt to build everything simultaneously.
+
+First build a polished MVP containing:
+
+### Core
+
+1. Note recognition
+2. Custom note selection
+3. Start with only 2 notes
+4. Guitar audio
+5. Multiple octaves
+6. Replay
+7. Correct/incorrect feedback
+8. Session score
+9. Progress tracking
+10. Guitar fretboard
+11. C/D → C/D/E → C/D/E/F progression
+12. Same note across different octaves
+13. Western note names
+14. Sargam toggle
+15. Responsive UI
+
+Then add:
+
+### Phase 2
+
+* Adaptive difficulty
+* Weak-note practice
+* Interval training
+* Melody training
+* Guitar "find the note" mode
+
+Then:
+
+### Phase 3
+
+* Song training
+* Microphone pitch detection
+* Advanced statistics
+* More instruments
+* Accounts/cloud sync
+
+---
+
+# 36. Recommended Initial User Flow
+
+When a brand-new user opens the app:
+
+## Welcome
+
+> Learn to hear musical notes.
+
+> Start with just two notes. Add more as you improve.
+
+Button:
+
+**START**
+
+---
+
+## Step 1
+
+Show:
+
+> Choose your first notes.
+
+C
+D
+E
+F
+G
+A
+B
+
+Default:
+
+☑ C
+☑ D
+
+Button:
+
+**START C vs D**
+
+---
+
+## Step 2
+
+Play a guitar C or D.
+
+Question:
+
+> What note did you hear?
+
+C | D
+
+---
+
+## Step 3
+
+After answering:
+
+> Correct!
+
+> C4
+
+> You identified the note correctly.
+
+NEXT
+
+---
+
+## Step 4
+
+After 10–20 questions:
+
+> Session complete
+
+> Accuracy: 80%
+
+> C: 90%
+
+> D: 70%
+
+Then:
+
+> **D is harder for you.**
+
+Button:
+
+**Practice C & D again**
+
+Secondary:
+
+**Add E**
+
+---
+
+# 37. Important Educational Principle
+
+Do not teach the user to memorize the visual appearance of notes.
+
+The main skill is:
+
+> **Sound → Brain → Note**
+
+not:
+
+> Picture → Note
+
+The fretboard is used later to establish:
+
+> **Sound → Note → Guitar position**
+
+Similarly, do not make the user depend on a reference note forever.
+
+Initially, a reference C/Sa can be useful.
+
+Eventually, exercises should randomly start in different keys and registers so the learner develops genuine relative pitch.
+
+---
+
+# 38. Future "Song Detective" Mode
+
+Eventually create a feature called:
+
+# Song Detective
+
+The user selects or hums a melody.
+
+The app breaks the process into:
+
+### 1. Find Sa
+
+### 2. Find the first note
+
+### 3. Is the next note higher or lower?
+
+### 4. How far did it move?
+
+### 5. Identify the note
+
+### 6. Find it on guitar
+
+### 7. Repeat
+
+The goal is to turn:
+
+> "I like this melody but I don't know the notes."
+
+into:
+
+> "I can figure out the melody myself."
+
+This should be the long-term direction of the product.
+
+---
+
+# 39. Technical Quality Requirements
+
+Write clean, maintainable, production-quality code.
+
+Requirements:
+
+* Component-based architecture
+* Strong separation between UI, audio engine, music theory and training logic
+* Reusable note model
+* Reusable quiz engine
+* Testable music calculations
+* Unit tests for:
+
+  * frequencies
+  * MIDI conversions
+  * note names
+  * octave calculations
+  * guitar fretboard positions
+  * intervals
+  * tuning calculations
+  * answer validation
+  * progression logic
+
+Do not duplicate note/frequency calculations throughout the application.
+
+---
+
+# 40. Final Product Goal
+
+The application should ultimately train the user through this progression:
+
+**Hear C/D**
+
+↓
+
+**Hear C/D/E**
+
+↓
+
+**Recognize all natural notes**
+
+↓
+
+**Recognize the same note in different octaves**
+
+↓
+
+**Understand higher/lower pitch**
+
+↓
+
+**Find the note on guitar**
+
+↓
+
+**Recognize intervals**
+
+↓
+
+**Recognize Sa/Re/Ga/Ma**
+
+↓
+
+**Recognize short melodies**
+
+↓
+
+**Transcribe melodies**
+
+↓
+
+**Hear a real song**
+
+↓
+
+**Figure out its melody on guitar by ear**
+
+The application should make this progression feel natural and achievable rather than overwhelming.
+
+Build the MVP first, but architect the code so all later stages can be added without rewriting the core audio, note, fretboard, and training systems.

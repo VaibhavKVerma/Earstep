@@ -2,13 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#f3eadc" />
-    <title>Earstep — Learn to identify musical notes by ear</title>
+    <meta name="application-name" content="Earstep" />
+    <meta name="apple-mobile-web-app-title" content="Earstep" />
+    <title>Earstep — Hear a note. Name it. Start with C vs D</title>
     <meta
       name="description"
-      content="Free ear training for beginner guitar players. Start with just two notes, then learn C vs D, octaves, intervals, sargam, and how to find notes on the fretboard."
+      content="Can't tell C from D yet? Train your ear one pair at a time — guitar, piano, octaves, and sargam. Free beginner ear training. No account."
     />
     <meta
       name="keywords"
@@ -27,20 +34,25 @@
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Earstep" />
-    <meta property="og:title" content="Earstep — Learn to identify musical notes by ear" />
+    <meta property="og:title" content="Earstep — Hear a note. Name it. Start with C vs D" />
     <meta
       property="og:description"
-      content="Start with two notes. Add more as you improve. Free ear training for beginner guitar players."
+      content="Can't tell C from D yet? Train your ear one pair at a time — guitar, piano, octaves, and sargam. Free. No account."
     />
     <meta property="og:url" content="https://earstep.netlify.app/" />
+    <meta property="og:image" content="https://earstep.netlify.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Earstep — Hear a note. Name it." />
     <meta property="og:locale" content="en_US" />
 
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Earstep — Learn notes by ear" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Earstep — Hear a note. Name it." />
     <meta
       name="twitter:description"
       content="Free beginner ear training. Start with C vs D, then grow to octaves, guitar, and sargam."
     />
+    <meta name="twitter:image" content="https://earstep.netlify.app/og.png" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -49,26 +61,38 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Earstep",
-        "url": "https://earstep.netlify.app/",
-        "description": "Free ear training web app for beginner guitar players. Learn to identify musical notes by ear, starting with two notes.",
-        "applicationCategory": "EducationalApplication",
-        "operatingSystem": "Web",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        },
-        "author": {
-          "@type": "Person",
-          "name": "Vaibhav Verma",
-          "email": "vaibhavverma15062001@gmail.com"
-        },
-        "creator": {
-          "@type": "Person",
-          "name": "Vaibhav Verma"
-        }
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Earstep",
+            "alternateName": "Earstep ear training",
+            "url": "https://earstep.netlify.app/"
+          },
+          {
+            "@type": "WebApplication",
+            "name": "Earstep",
+            "url": "https://earstep.netlify.app/",
+            "description": "Hear a note. Name it. Free ear training for beginner guitar players, starting with two notes.",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web",
+            "image": "https://earstep.netlify.app/og.png",
+            "logo": "https://earstep.netlify.app/icon-512.png",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "author": {
+              "@type": "Person",
+              "name": "Vaibhav Verma",
+              "email": "vaibhavverma15062001@gmail.com"
+            },
+            "creator": {
+              "@type": "Person",
+              "name": "Vaibhav Verma"
+            }
+          }
+        ]
       }
     </script>
   </head>
@@ -76,11 +100,10 @@
     <div id="root"></div>
     <noscript>
       <main>
-        <h1>Earstep — Learn to hear musical notes</h1>
+        <h1>Earstep — Hear a note. Name it.</h1>
         <p>
-          Free ear training for beginner guitar players. Start with just two notes, for example C vs D,
-          then add more as you improve. Practice note recognition, octaves, guitar fretboard positions,
-          intervals, and Indian sargam.
+          Can't tell C from D yet? Train your ear one pair at a time — guitar, piano, octaves, and
+          sargam. Free beginner ear training. No account.
         </p>
         <p>No account needed. Progress stays on this device.</p>
         <p>Made by Cursor. Idea by Vaibhav Verma.</p>
