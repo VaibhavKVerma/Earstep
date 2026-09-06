@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { InstrumentId, SoundSource } from '../../audio/AudioEngine';
 import { CHROMATIC_NAMES, NATURAL_NAMES, type NoteName } from '../../music/notes';
 import { adviseProgression, formatNoteSet, nextNaturalNote, noteAccuracy, rankedNotes } from '../../music/progression';
+import { buildJourney, uncelebratedMasteries } from '../../training/journey';
 import {
   DIFFICULTY_PRESETS,
   applyDifficulty,
@@ -9,8 +10,10 @@ import {
   mistakeWeights,
 } from '../../training/quizEngine';
 import type { Difficulty, PracticeConfig, SessionSummary } from '../../training/types';
+import { markCelebrated, setActiveLevel } from '../../persistence/store';
 import { BottomNav, Chip, TopBar } from '../components/widgets';
 import { useProgress } from '../context/ProgressContext';
+import { beginLevel } from '../journeyLaunch';
 import type { Go } from '../nav';
 
 const INSTRUMENTS: { id: InstrumentId; label: string }[] = [
@@ -50,7 +53,7 @@ export function PracticeSetup({ go }: { go: Go }) {
     const safeNotes = chosen.length >= 2 ? chosen : (['C', 'D'] as NoteName[]);
     const safeOctaves = (overrides.octaves ?? octaves).length ? (overrides.octaves ?? octaves) : [4];
     update((current) => ({
-      ...current,
+      ...setActiveLevel(current, undefined),
       selectedNotes: safeNotes,
       selectedOctaves: safeOctaves,
       settings: { ...current.settings, instrument, soundSource },
@@ -161,9 +164,45 @@ export function SessionComplete({
     ...item,
     misses: item.total - Math.round(item.accuracy * item.total),
   }));
+  const [freshlyMastered] = useState(() => uncelebratedMasteries(progress));
+  const celebration = freshlyMastered[0];
+  const journey = buildJourney(progress);
+  const unlocked = celebration
+    ? journey.levels.find((item) => item.level.number === celebration.level.number + 1)
+    : null;
+
+  useEffect(() => {
+    if (!freshlyMastered.length) return;
+    update((current) => markCelebrated(current, freshlyMastered.map((item) => item.level.id)));
+  }, [freshlyMastered, update]);
 
   return (
     <main className="screen">
+      {celebration && (
+        <section className="card journey-celebrate">
+          <p className="eyebrow">Level complete</p>
+          <h2>{celebration.level.title} mastered</h2>
+          <p className="journey-stars" aria-label={`${celebration.stars} stars`}>
+            {'★'.repeat(celebration.stars)}
+            {'☆'.repeat(Math.max(0, 5 - celebration.stars))}
+          </p>
+          {unlocked && (
+            <p>
+              New level unlocked: <strong>{unlocked.level.title}</strong>
+            </p>
+          )}
+          <button
+            type="button"
+            className="primary"
+            onClick={() => {
+              update((current) => markCelebrated(current, freshlyMastered.map((item) => item.level.id)));
+              go({ id: 'journey' });
+            }}
+          >
+            Continue journey
+          </button>
+        </section>
+      )}
       <p className="eyebrow">Session complete</p>
       <h1>{Math.round(summary.accuracy * 100)}% accuracy</h1>
       <p className="lede">
@@ -180,15 +219,28 @@ export function SessionComplete({
       </ul>
       {weak[0] && weak[0].accuracy < 1 && (
         <p>
-          <strong>{weak[0].name}</strong> is harder for you right now.
+          <strong>{weak[0].name}</strong> is currently your hardest note.
         </p>
       )}
-      <p>{advice.message}</p>
+      <p>{celebration ? `You've mastered ${celebration.level.title}.` : advice.message}</p>
+      {!celebration && summary.accuracy < 0.85 && <p>Keep practicing. You&apos;re getting there.</p>}
       <div className="stack">
         <button type="button" className="primary" onClick={() => go({ id: 'train', config, heading: formatNoteSet(config.notes) })}>
           Practice {formatNoteSet(config.notes)} again
         </button>
-        {nextNote && (
+        {celebration && unlocked && (
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => {
+              update((current) => markCelebrated(current, freshlyMastered.map((item) => item.level.id)));
+              beginLevel(unlocked.level, progress, update, go);
+            }}
+          >
+            Unlock {unlocked.level.title}
+          </button>
+        )}
+        {nextNote && !celebration && (
           <button
             type="button"
             className="ghost"
@@ -223,9 +275,12 @@ export function SessionComplete({
               });
             }}
           >
-            Practice weak notes
+            Practice {weak[0]?.name && weak[0].accuracy < 1 ? weak[0].name : 'weak notes'}
           </button>
         )}
+        <button type="button" className="text-btn" onClick={() => go({ id: 'journey' })}>
+          Journey
+        </button>
         <button type="button" className="text-btn" onClick={() => go({ id: 'home' })}>
           Home
         </button>

@@ -12,6 +12,7 @@ import {
   SongMode,
 } from './ui/screens/Explore';
 import { Home } from './ui/screens/Home';
+import { Journey, LevelDetail } from './ui/screens/Journey';
 import { LessonList, LessonView } from './ui/screens/Lessons';
 import { Settings } from './ui/screens/Settings';
 import { Stats } from './ui/screens/Stats';
@@ -19,6 +20,7 @@ import { Training } from './ui/screens/Training';
 import { Onboarding, Welcome } from './ui/screens/Welcome';
 import { AdBanner } from './ads/AdBanner';
 import { shouldShowAd } from './ads/config';
+import { MusicBackdrop } from './ui/components/MusicBackdrop';
 import { SiteFooter } from './ui/components/widgets';
 
 export default function App() {
@@ -31,6 +33,8 @@ export default function App() {
   if (screen.id === 'welcome') body = <Welcome go={setScreen} />;
   else if (screen.id === 'onboarding') body = <Onboarding go={setScreen} />;
   else if (screen.id === 'home') body = <Home go={setScreen} />;
+  else if (screen.id === 'journey') body = <Journey go={setScreen} />;
+  else if (screen.id === 'level') body = <LevelDetail go={setScreen} levelId={screen.levelId} />;
   else if (screen.id === 'practice') body = <PracticeSetup go={setScreen} />;
   else if (screen.id === 'train') {
     body = <Training go={setScreen} config={screen.config} heading={screen.heading} />;
@@ -51,6 +55,7 @@ export default function App() {
 
   return (
     <div className="app-root">
+      <MusicBackdrop />
       <div className="app-main">{body}</div>
       {shouldShowAd(screen.id) && <AdBanner />}
       <SiteFooter />

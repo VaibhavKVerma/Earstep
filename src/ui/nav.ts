@@ -4,6 +4,8 @@ export type Screen =
   | { id: 'welcome' }
   | { id: 'onboarding' }
   | { id: 'home' }
+  | { id: 'journey' }
+  | { id: 'level'; levelId: string }
   | { id: 'practice' }
   | { id: 'train'; config: PracticeConfig; heading?: string }
   | { id: 'complete'; summary: SessionSummary; config: PracticeConfig }

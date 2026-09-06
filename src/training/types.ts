@@ -24,6 +24,7 @@ export interface PracticeConfig {
   mode: PracticeMode;
   includeChromatic?: boolean;
   noteWeights?: Record<string, number>;
+  levelId?: string;
 }
 
 export interface QuizQuestion {
@@ -56,6 +57,7 @@ export interface SessionSummary {
   questionCount: number;
   replayCount: number;
   perNote: Record<string, { correct: number; total: number }>;
+  levelId?: string;
 }
 
 export interface NoteStat {
@@ -98,6 +100,21 @@ export interface UserProgress {
   history: SessionSummary[];
   achievements: string[];
   totalCorrect: number;
+  journey: JourneyState;
+}
+
+export interface JourneyLevelStat {
+  questions: number;
+  correct: number;
+  sessions: number;
+  bestAccuracy: number;
+  lastAccuracy: number;
+}
+
+export interface JourneyState {
+  stats: Record<string, JourneyLevelStat>;
+  celebrated: string[];
+  activeLevelId?: string;
 }
 
 export interface AdaptiveThresholds {

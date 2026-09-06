@@ -1,6 +1,7 @@
 import { formatNoteSet } from '../../music/progression';
 import { NATURAL_NAMES, type NoteName } from '../../music/notes';
 import { applyDifficulty, defaultConfig } from '../../training/quizEngine';
+import { HearNow } from '../components/HearNow';
 import { Chip } from '../components/widgets';
 import type { Go } from '../nav';
 import { useProgress } from '../context/ProgressContext';
@@ -20,6 +21,7 @@ export function Welcome({ go }: { go: Go }) {
         Learn notes by ear, starting with C vs D. Built for beginners who want to learn guitar
         and figure out songs without dumping all twelve notes on day one.
       </p>
+      <HearNow />
       <button type="button" className="primary xl" onClick={() => go({ id: 'onboarding' })}>
         Start ear training
       </button>

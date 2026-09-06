@@ -12,7 +12,7 @@ import {
   type NoteName,
 } from '../../music/notes';
 import { PUBLIC_DOMAIN_SONGS, melodyDirection } from '../../music/songs';
-import { completeSession, grantAchievement, recordAnswer, summarizeSession } from '../../persistence/store';
+import { completeSession, grantAchievement, recordAnswer, recordJourneyHit, summarizeSession } from '../../persistence/store';
 import { guitarExplanation, octaveExplanation } from '../../training/explanations';
 import {
   generateIntervalQuestion,
@@ -36,7 +36,7 @@ export function OneNoteMany({ go }: { go: Go }) {
 
   return (
     <main className="screen">
-      <TopBar title="One note, many pitches" onBack={() => go({ id: 'home' })} />
+      <TopBar title="One note, many pitches" onBack={() => go(progress.journey?.activeLevelId ? { id: 'journey' } : { id: 'home' })} />
       {step === 0 && (
         <>
           <p className="lede">
@@ -143,19 +143,22 @@ export function OctaveTraining({ go }: { go: Go }) {
     const selected = noteFromName(name, octave);
     const correct = validateOctaveAnswer(target.midi, selected.midi);
     setPicked(octave);
-    update((current) => ({
-      ...current,
-      octaveStats: {
-        correct: current.octaveStats.correct + (correct ? 1 : 0),
-        incorrect: current.octaveStats.incorrect + (correct ? 0 : 1),
-      },
-      xp: current.xp + (correct ? 10 : 2),
-    }));
+    update((current) => {
+      const next = recordJourneyHit(current, correct);
+      return {
+        ...next,
+        octaveStats: {
+          correct: next.octaveStats.correct + (correct ? 1 : 0),
+          incorrect: next.octaveStats.incorrect + (correct ? 0 : 1),
+        },
+        xp: next.xp + (correct ? 10 : 2),
+      };
+    });
   }
 
   return (
     <main className="screen">
-      <TopBar title="Low / Middle / High" onBack={() => go({ id: 'home' })} />
+      <TopBar title="Low / Middle / High" onBack={() => go(progress.journey?.activeLevelId ? { id: 'journey' } : { id: 'home' })} />
       <p className="lede">
         Which {displayNameForNoteName(name, progress.settings.noteSystem, progress.settings.tonicPitchClass)} did you
         hear? Numbers like C3 can wait.
@@ -247,7 +250,7 @@ export function GuitarFind({ go }: { go: Go }) {
 
   return (
     <main className="screen">
-      <TopBar title="Find it on guitar" onBack={() => go({ id: 'home' })} />
+      <TopBar title="Find it on guitar" onBack={() => go(progress.journey?.activeLevelId ? { id: 'journey' } : { id: 'home' })} />
       <p className="lede">Listen, then tap a fret. Several places can be right.</p>
       <PlayButton
         playing={false}
@@ -323,12 +326,15 @@ export function IntervalTraining({ go }: { go: Go }) {
   function choose(id: IntervalId) {
     setPicked(id);
     const correct = id === expected.id;
-    update((current) => ({ ...current, xp: current.xp + (correct ? 10 : 2) }));
+    update((current) => {
+      const next = recordJourneyHit(current, correct);
+      return { ...next, xp: next.xp + (correct ? 10 : 2) };
+    });
   }
 
   return (
     <main className="screen">
-      <TopBar title="Intervals" onBack={() => go({ id: 'home' })} />
+      <TopBar title="Intervals" onBack={() => go(progress.journey?.activeLevelId ? { id: 'journey' } : { id: 'home' })} />
       <p className="lede">
         Level {level}: you will hear the first note, then the second. Name the distance between them.
       </p>
@@ -431,7 +437,7 @@ export function MelodyTraining({ go }: { go: Go }) {
 
   return (
     <main className="screen">
-      <TopBar title="Melody" onBack={() => go({ id: 'home' })} />
+      <TopBar title="Melody" onBack={() => go(progress.journey?.activeLevelId ? { id: 'journey' } : { id: 'home' })} />
       <div className="chip-row">
         <button type="button" className={`chip ${mode === 'first' ? 'active' : ''}`} onClick={() => setMode('first')}>
           First note
@@ -560,7 +566,7 @@ export function SongMode({ go }: { go: Go }) {
 
   return (
     <main className="screen">
-      <TopBar title="Learn from songs" onBack={() => go({ id: 'home' })} />
+      <TopBar title="Learn from songs" onBack={() => go(progress.journey?.activeLevelId ? { id: 'journey' } : { id: 'home' })} />
       <div className="chip-row">
         {PUBLIC_DOMAIN_SONGS.map((item) => (
           <button
@@ -682,7 +688,7 @@ export function SongMode({ go }: { go: Go }) {
 }
 
 export function HearSingFind({ go }: { go: Go }) {
-  const { progress } = useProgress();
+  const { progress, update } = useProgress();
   const names = progress.selectedNotes.length ? progress.selectedNotes : (['C', 'D'] as NoteName[]);
   const [target] = useState(() => noteFromName(pick(names), 4));
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -690,7 +696,7 @@ export function HearSingFind({ go }: { go: Go }) {
 
   return (
     <main className="screen">
-      <TopBar title="Hear → Sing → Find" onBack={() => go({ id: 'home' })} />
+      <TopBar title="Hear → Sing → Find" onBack={() => go(progress.journey?.activeLevelId ? { id: 'journey' } : { id: 'home' })} />
       {step === 1 && (
         <>
           <p className="lede">Step 1 — just listen.</p>
@@ -706,15 +712,12 @@ export function HearSingFind({ go }: { go: Go }) {
       )}
       {step === 2 && (
         <>
-          <p className="lede">Step 2 — hum the note. The app will not grade your voice yet. That can come later with a microphone.</p>
+          <p className="lede">Step 2 — hum or play the note. This step is for your ear, not a score.</p>
           <button type="button" className="ghost" onClick={() => void audioEngine.playFrequency(target.frequency, { instrument: progress.settings.instrument })}>
             Hear it again
           </button>
           <button type="button" className="primary" onClick={() => setStep(3)}>
             I hummed it
-          </button>
-          <button type="button" className="text-btn" onClick={() => setStep(3)}>
-            Skip singing
           </button>
         </>
       )}
@@ -726,7 +729,21 @@ export function HearSingFind({ go }: { go: Go }) {
             highlight={found ? 'octave' : 'none'}
             showNames={found}
             onSelect={(_s, _f, note) => {
-              if (note.pitchClass === target.pitchClass) setFound(true);
+              if (note.pitchClass === target.pitchClass) {
+                setFound(true);
+                update((current) =>
+                  recordAnswer(current, {
+                    questionId: `hsf-${target.midi}`,
+                    expected: target.name,
+                    expectedMidi: target.midi,
+                    selected: note.name,
+                    correct: true,
+                    firstAttempt: true,
+                    replayCount: 0,
+                    mode: 'hear-sing-find',
+                  }),
+                );
+              }
             }}
             noteSystem={progress.settings.noteSystem}
             tonic={progress.settings.tonicPitchClass}

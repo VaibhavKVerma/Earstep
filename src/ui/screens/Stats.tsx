@@ -71,7 +71,7 @@ export function Stats({ go }: { go: Go }) {
           ))}
         </ul>
       </main>
-      <BottomNav go={go} active="stats" />
+        <BottomNav go={go} active="progress" />
     </div>
   );
 }

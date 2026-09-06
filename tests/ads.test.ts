@@ -5,6 +5,7 @@ describe('ad placement', () => {
   it('shows ads on browsing screens', () => {
     expect(shouldShowAd('home')).toBe(true);
     expect(shouldShowAd('practice')).toBe(true);
+    expect(shouldShowAd('journey')).toBe(true);
     expect(shouldShowAd('lessons')).toBe(true);
     expect(shouldShowAd('stats')).toBe(true);
     expect(shouldShowAd('settings')).toBe(true);

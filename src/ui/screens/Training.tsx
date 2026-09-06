@@ -112,7 +112,7 @@ export function Training({
 
   function next() {
     if (index + 1 >= questions.length) {
-      const summary = summarizeSession(answers, config.notes, config.mode);
+      const summary = summarizeSession(answers, config.notes, config.mode, config.levelId ?? progress.journey?.activeLevelId);
       update((current) => completeSession(current, summary));
       go({ id: 'complete', summary, config });
       return;
@@ -140,7 +140,10 @@ export function Training({
 
   return (
     <main className="screen train">
-      <TopBar title={heading ?? formatNoteSet(config.notes)} onBack={() => go({ id: 'home' })} />
+      <TopBar
+        title={heading ?? formatNoteSet(config.notes)}
+        onBack={() => go({ id: progress.journey?.activeLevelId ? 'journey' : 'home' })}
+      />
       <ProgressDots current={index} total={questions.length} />
       <p className="muted">{DIFFICULTY_PRESETS[config.difficulty].questionHint}</p>
 
@@ -194,13 +197,13 @@ export function Training({
           </div>
           {showBoard && (
             <div className="board-block">
+              <p className="muted">Tap a fret to hear that note.</p>
               <Fretboard
                 target={question.note}
                 highlight="octave"
                 showNames
                 noteSystem={settings.noteSystem}
                 tonic={settings.tonicPitchClass}
-                interactive={false}
               />
               <ul className="pos-list">
                 {positionList(

@@ -21,11 +21,11 @@ export function LessonList({ go }: { go: Go }) {
               <li key={lesson.id}>
                 <button type="button" className="card lesson-row" onClick={() => go({ id: 'lesson', lessonId: lesson.id })}>
                   <span className="num">{lesson.number}</span>
-                  <span>
+                  <span className="lesson-row-copy">
                     <strong>{lesson.title}</strong>
                     <em>{lesson.summary}</em>
+                    <span className="lesson-row-meta">{done ? 'Done' : `${lesson.minutes} min`}</span>
                   </span>
-                  <span className="muted">{done ? 'Done' : `${lesson.minutes} min`}</span>
                 </button>
               </li>
             );

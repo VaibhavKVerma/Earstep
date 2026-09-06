@@ -1,0 +1,756 @@
+import type { IntervalId } from '../music/intervals';
+import type { NoteSystem } from '../music/naming';
+import type { NoteName } from '../music/notes';
+import { DEFAULT_MASTERY, type MasteryCriteria } from './mastery';
+import type { Difficulty, PracticeMode } from './types';
+
+export interface RoadmapLevel {
+  id: string;
+  worldId: string;
+  number: number;
+  title: string;
+  shortTitle: string;
+  description: string;
+  why: string;
+  skill: string;
+  difficulty: Difficulty;
+  prerequisites: string[];
+  mastery: MasteryCriteria;
+  practiceMode: PracticeMode;
+  notes?: NoteName[];
+  octaves?: number[];
+  intervals?: IntervalId[];
+  includeChromatic?: boolean;
+  questionCount?: number;
+  noteSystem?: NoteSystem;
+  comingLabels?: string[];
+}
+
+export interface RoadmapWorld {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: string;
+  order: number;
+  levels: RoadmapLevel[];
+}
+
+type LevelDraft = Omit<RoadmapLevel, 'worldId' | 'prerequisites' | 'mastery' | 'difficulty'> & {
+  prerequisites?: string[];
+  mastery?: MasteryCriteria;
+  difficulty?: Difficulty;
+};
+
+function chain(worldId: string, drafts: LevelDraft[], entry: string[] = []): RoadmapLevel[] {
+  return drafts.map((draft, index) => ({
+    difficulty: 'beginner',
+    mastery: DEFAULT_MASTERY,
+    ...draft,
+    worldId,
+    prerequisites: draft.prerequisites ?? (index === 0 ? entry : [drafts[index - 1].id]),
+  }));
+}
+
+const HEAR = chain('hear', [
+  {
+    id: 'hear-cd',
+    number: 1,
+    title: 'C vs D',
+    shortTitle: 'C / D',
+    description: 'Identify C and D by sound. Only two notes.',
+    why: "You're teaching your brain to associate a sound with a note name.",
+    skill: 'Basic note recognition',
+    practiceMode: 'note',
+    notes: ['C', 'D'],
+    questionCount: 16,
+    comingLabels: ['E', 'F', 'All 7 notes'],
+  },
+  {
+    id: 'hear-cde',
+    number: 2,
+    title: 'C, D & E',
+    shortTitle: 'C D E',
+    description: 'Identify C, D and E by sound.',
+    why: 'These are the building blocks of recognizing melodies by ear.',
+    skill: 'Basic note recognition',
+    practiceMode: 'note',
+    notes: ['C', 'D', 'E'],
+    questionCount: 16,
+    comingLabels: ['F', 'G', 'All 7 notes'],
+  },
+  {
+    id: 'hear-cdef',
+    number: 3,
+    title: 'C, D, E & F',
+    shortTitle: 'C D E F',
+    description: 'Learn to distinguish four notes. E to F is a closer step.',
+    why: 'A melody rarely stays on three notes. F teaches your ear a smaller distance.',
+    skill: 'Four-note recognition',
+    practiceMode: 'note',
+    notes: ['C', 'D', 'E', 'F'],
+    difficulty: 'easy',
+    comingLabels: ['G', 'A', 'All 7 notes'],
+  },
+  {
+    id: 'hear-cdefg',
+    number: 4,
+    title: 'Five notes',
+    shortTitle: 'C–G',
+    description: 'Add G — the open fifth above C.',
+    why: 'C to G is one of the most common leaps in songs. Hearing it unlocks a lot of music.',
+    skill: 'Five-note recognition',
+    practiceMode: 'note',
+    notes: ['C', 'D', 'E', 'F', 'G'],
+    difficulty: 'easy',
+  },
+  {
+    id: 'hear-cdefga',
+    number: 5,
+    title: 'Six notes',
+    shortTitle: 'C–A',
+    description: 'Add A. Six of the seven natural notes.',
+    why: 'You are close to the full natural set. A sits in a friendly, open place.',
+    skill: 'Six-note recognition',
+    practiceMode: 'note',
+    notes: ['C', 'D', 'E', 'F', 'G', 'A'],
+    difficulty: 'easy',
+  },
+  {
+    id: 'hear-naturals',
+    number: 6,
+    title: 'All natural notes',
+    shortTitle: 'C–B',
+    description: 'C D E F G A B. No sharps yet.',
+    why: 'These seven names repeat in every octave. Master them before chromatic notes.',
+    skill: 'Natural-note recognition',
+    practiceMode: 'note',
+    notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+    difficulty: 'medium',
+    comingLabels: ['Octaves', 'Guitar fretboard'],
+  },
+]);
+
+const PITCH = chain(
+  'pitch',
+  [
+    {
+      id: 'pitch-same-note',
+      number: 7,
+      title: 'Same note, different pitch',
+      shortTitle: 'C3 C4 C5',
+      description: 'Hear C3, C4 and C5. They are all C.',
+      why: 'The same note can occur at different pitches. Learning this helps you recognize C whether it is high or low.',
+      skill: 'Pitch class',
+      practiceMode: 'one-note',
+      notes: ['C'],
+      octaves: [3, 4, 5],
+    },
+    {
+      id: 'pitch-higher-lower',
+      number: 8,
+      title: 'Higher or lower',
+      shortTitle: 'Higher / lower',
+      description: 'Compare two notes. Which one is higher?',
+      why: 'Before naming distances, hear direction. Songs are made of up, down, and stay.',
+      skill: 'Relative height',
+      practiceMode: 'higher-lower',
+      notes: ['C', 'E'],
+    },
+    {
+      id: 'pitch-octaves',
+      number: 9,
+      title: 'Octave recognition',
+      shortTitle: 'Octaves',
+      description: 'Identify C3 vs C4 vs C5 as Low, Middle, or High.',
+      why: 'Once the name is solid, you can learn which height you heard.',
+      skill: 'Octave bands',
+      practiceMode: 'octave',
+      notes: ['C'],
+      octaves: [3, 4, 5],
+    },
+  ],
+  ['hear-naturals'],
+);
+
+const GUITAR = chain(
+  'guitar',
+  [
+    {
+      id: 'guitar-fretboard',
+      number: 10,
+      title: 'Learn the guitar fretboard',
+      shortTitle: 'Fretboard',
+      description: 'Standard tuning is E A D G B E, low to high.',
+      why: 'Connecting a heard note to a string makes ear training useful on a real instrument.',
+      skill: 'Fretboard layout',
+      practiceMode: 'guitar',
+      notes: ['C', 'D', 'E', 'G', 'A'],
+    },
+    {
+      id: 'guitar-find-note',
+      number: 11,
+      title: 'Find the note',
+      shortTitle: 'Find G',
+      description: 'Hear a note — then find it on the fretboard.',
+      why: 'This is the first time your ear and your hands work together.',
+      skill: 'Ear to fretboard',
+      practiceMode: 'guitar',
+      notes: ['C', 'D', 'E', 'G', 'A'],
+    },
+    {
+      id: 'guitar-positions',
+      number: 12,
+      title: 'Multiple positions',
+      shortTitle: 'Many Gs',
+      description: 'The same note lives in more than one place. G is a good example.',
+      why: 'Guitars repeat pitches. Knowing that keeps you from thinking there is only one right fret.',
+      skill: 'Shared pitches',
+      practiceMode: 'guitar',
+      notes: ['G', 'D', 'A', 'E'],
+    },
+    {
+      id: 'guitar-hear-find',
+      number: 13,
+      title: 'Hear → Find',
+      shortTitle: 'Hear → Find',
+      description: 'Play a guitar note. Name it, then find it on the fretboard.',
+      why: 'Ear → note → guitar is the path toward figuring out songs.',
+      skill: 'Ear → note → guitar',
+      practiceMode: 'hear-sing-find',
+      notes: ['C', 'D', 'E', 'G'],
+    },
+  ],
+  ['pitch-octaves'],
+);
+
+const RELATIVE = chain(
+  'relative',
+  [
+    {
+      id: 'interval-same-diff',
+      number: 14,
+      title: 'Same or different',
+      shortTitle: 'Same?',
+      description: 'Two notes. Are they the same pitch, or different?',
+      why: 'Songs are made from movement between notes. First hear whether anything moved.',
+      skill: 'Unison',
+      practiceMode: 'interval',
+      notes: ['C', 'D', 'E'],
+      intervals: ['unison'],
+    },
+    {
+      id: 'interval-direction',
+      number: 15,
+      title: 'Higher / lower',
+      shortTitle: 'Direction',
+      description: 'Two notes. Did the second go up or down?',
+      why: 'Direction is the seed of transcribing a melody.',
+      skill: 'Interval direction',
+      practiceMode: 'higher-lower',
+      notes: ['C', 'D', 'E', 'G'],
+    },
+    {
+      id: 'interval-m2',
+      number: 16,
+      title: 'Major 2nd',
+      shortTitle: 'Major 2nd',
+      description: 'Hear the step from C to D — Do to Re.',
+      why: 'Most scale movement is a step. This is the most common interval in tunes.',
+      skill: 'Major 2nd',
+      practiceMode: 'interval',
+      notes: ['C', 'D', 'E'],
+      intervals: ['M2'],
+    },
+    {
+      id: 'interval-m3',
+      number: 17,
+      title: 'Major 3rd',
+      shortTitle: 'Major 3rd',
+      description: 'Hear C to E — a bright major smile.',
+      why: 'The major third is how you hear a major chord’s color.',
+      skill: 'Major 3rd',
+      practiceMode: 'interval',
+      notes: ['C', 'E', 'G'],
+      intervals: ['M3'],
+    },
+    {
+      id: 'interval-p4',
+      number: 18,
+      title: 'Perfect 4th',
+      shortTitle: 'Perfect 4th',
+      description: 'C to F. Think “Here Comes the Bride.”',
+      why: 'Fourths show up in bass lines and guitar shapes constantly.',
+      skill: 'Perfect 4th',
+      practiceMode: 'interval',
+      notes: ['C', 'F', 'G'],
+      intervals: ['P4'],
+    },
+    {
+      id: 'interval-p5',
+      number: 19,
+      title: 'Perfect 5th',
+      shortTitle: 'Perfect 5th',
+      description: 'C to G. Twinkle Twinkle, or a power chord.',
+      why: 'Fifths are the skeleton of most Western harmony.',
+      skill: 'Perfect 5th',
+      practiceMode: 'interval',
+      notes: ['C', 'G', 'D'],
+      intervals: ['P5'],
+    },
+    {
+      id: 'interval-octave',
+      number: 20,
+      title: 'Octave interval',
+      shortTitle: '8ve',
+      description: 'The same note, much higher or lower.',
+      why: 'An octave is both “the same” and “far away.” That dual feeling is useful later.',
+      skill: 'Octave interval',
+      practiceMode: 'interval',
+      notes: ['C', 'G'],
+      intervals: ['P8'],
+    },
+    {
+      id: 'interval-mastery',
+      number: 21,
+      title: 'Interval mastery',
+      shortTitle: 'Mix',
+      description: 'Mix the intervals you have learned. Not every interval at once.',
+      why: 'Songs blend these distances. Hearing them in a mix is the real skill.',
+      skill: 'Mixed intervals',
+      practiceMode: 'interval',
+      notes: ['C', 'D', 'E', 'F', 'G'],
+      intervals: ['unison', 'M2', 'M3', 'P4', 'P5', 'P8'],
+      difficulty: 'medium',
+    },
+  ],
+  ['guitar-hear-find'],
+);
+
+const LANGUAGE = chain(
+  'language',
+  [
+    {
+      id: 'lang-major-scale',
+      number: 22,
+      title: 'Major scale',
+      shortTitle: 'C major',
+      description: 'Hear C D E F G A B C as one family.',
+      why: 'A scale is not a list — it is a neighborhood of notes that belong together.',
+      skill: 'Major scale',
+      practiceMode: 'note',
+      notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+      difficulty: 'easy',
+    },
+    {
+      id: 'lang-sargam',
+      number: 23,
+      title: 'Sa Re Ga Ma',
+      shortTitle: 'Sargam',
+      description: 'The same seven notes with Indian names: Sa Re Ga Ma Pa Dha Ni.',
+      why: 'Western letters and sargam describe the same relationships. You can think in either.',
+      skill: 'Sargam names',
+      practiceMode: 'note',
+      notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+      noteSystem: 'sargam',
+    },
+    {
+      id: 'lang-tonic',
+      number: 24,
+      title: 'Find Sa / tonic',
+      shortTitle: 'Tonic',
+      description: 'Find the musical “home” of a phrase.',
+      why: 'The tonic is the musical home of a song. Finding it helps you understand the key.',
+      skill: 'Tonic',
+      practiceMode: 'note',
+      notes: ['C', 'D', 'E', 'G'],
+    },
+    {
+      id: 'lang-degrees',
+      number: 25,
+      title: 'Scale degrees',
+      shortTitle: '1–7',
+      description: 'Sa = 1, Re = 2, Ga = 3, Ma = 4, Pa = 5, Dha = 6, Ni = 7.',
+      why: 'Degrees stay the same when the key moves. That is how musicians talk about function.',
+      skill: 'Scale degrees',
+      practiceMode: 'note',
+      notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+    },
+    {
+      id: 'lang-key-change',
+      number: 26,
+      title: 'Change the key',
+      shortTitle: 'New Sa',
+      description: 'If Sa = C, then Sa = D, the relationships stay the same.',
+      why: 'Songs live in different keys. The pattern is what matters, not the starting letter.',
+      skill: 'Key independence',
+      practiceMode: 'note',
+      notes: ['D', 'E', 'F', 'G', 'A'],
+    },
+  ],
+  ['interval-mastery'],
+);
+
+const MELODY = chain(
+  'melody',
+  [
+    {
+      id: 'melody-direction',
+      number: 27,
+      title: 'Higher / lower melody',
+      shortTitle: 'Contour',
+      description: 'Listen to two or three notes. Identify the movement.',
+      why: 'A melody is a path. First hear whether it climbs, falls, or turns.',
+      skill: 'Melodic contour',
+      practiceMode: 'melody',
+      notes: ['C', 'D', 'E'],
+    },
+    {
+      id: 'melody-simple',
+      number: 28,
+      title: 'Simple melody',
+      shortTitle: 'C D E D',
+      description: 'Identify a short sequence such as C → D → E → D.',
+      why: 'Naming a short phrase is the first real transcription.',
+      skill: 'Short phrases',
+      practiceMode: 'melody',
+      notes: ['C', 'D', 'E'],
+    },
+    {
+      id: 'melody-reproduce',
+      number: 29,
+      title: 'Reproduce melody',
+      shortTitle: 'Play it back',
+      description: 'Hear a melody and reproduce it on a virtual fretboard.',
+      why: 'If you can replay it, you understand it — not just recognize it.',
+      skill: 'Reproduction',
+      practiceMode: 'hear-sing-find',
+      notes: ['C', 'D', 'E', 'G'],
+    },
+    {
+      id: 'melody-transcribe',
+      number: 30,
+      title: 'Melody transcription',
+      shortTitle: 'Transcribe',
+      description: 'Hear a short phrase and identify the notes.',
+      why: 'This is figuring out a tune, one note at a time.',
+      skill: 'Transcription',
+      practiceMode: 'melody',
+      notes: ['C', 'D', 'E', 'F', 'G'],
+      difficulty: 'medium',
+    },
+    {
+      id: 'melody-guitar',
+      number: 31,
+      title: 'Melody on guitar',
+      shortTitle: 'Hear → guitar',
+      description: 'Hear, identify, then find the phrase on guitar.',
+      why: 'Ear → names → hands. That is how songs move from listening to playing.',
+      skill: 'Melody on guitar',
+      practiceMode: 'guitar',
+      notes: ['C', 'D', 'E', 'G'],
+    },
+  ],
+  ['lang-key-change'],
+);
+
+const SONGS = chain(
+  'songs',
+  [
+    {
+      id: 'song-start-note',
+      number: 32,
+      title: 'Find the starting note',
+      shortTitle: 'First note',
+      description: 'Listen to a phrase and name the first pitch.',
+      why: 'Every transcription starts with one confident note.',
+      skill: 'Song entry',
+      practiceMode: 'song',
+      notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+    },
+    {
+      id: 'song-tonic',
+      number: 33,
+      title: 'Find the tonic',
+      shortTitle: 'Song home',
+      description: 'Hear where the phrase wants to rest.',
+      why: 'Once you know home, the other notes make sense around it.',
+      skill: 'Tonic in a song',
+      practiceMode: 'song',
+      notes: ['C', 'D', 'E', 'G'],
+    },
+    {
+      id: 'song-melody',
+      number: 34,
+      title: 'Find the melody',
+      shortTitle: 'The tune',
+      description: 'Follow the sung or lead line, note by note.',
+      why: 'The melody is what people hum. Catching it is the core detective skill.',
+      skill: 'Melody hunting',
+      practiceMode: 'song',
+      notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+    },
+    {
+      id: 'song-bass',
+      number: 35,
+      title: 'Identify bass movement',
+      shortTitle: 'Bass',
+      description: 'Listen underneath the tune. Where does the low note go?',
+      why: 'Bass often outlines the chords. Hearing it is a shortcut to harmony.',
+      skill: 'Bass motion',
+      practiceMode: 'song',
+      notes: ['C', 'E', 'G'],
+    },
+    {
+      id: 'song-major-minor',
+      number: 36,
+      title: 'Identify major / minor',
+      shortTitle: 'Color',
+      description: 'Does the phrase feel bright (major) or darker (minor)?',
+      why: 'Color is often the first thing you notice — and it narrows the chords.',
+      skill: 'Mode color',
+      practiceMode: 'song',
+      notes: ['C', 'D', 'E', 'G'],
+    },
+    {
+      id: 'song-chords',
+      number: 37,
+      title: 'Identify chords',
+      shortTitle: 'Chords',
+      description: 'Hear stacked notes as a single harmony.',
+      why: 'Chords provide the harmonic foundation underneath melodies.',
+      skill: 'Chord quality',
+      practiceMode: 'song',
+      notes: ['C', 'E', 'G'],
+    },
+    {
+      id: 'song-progression',
+      number: 38,
+      title: 'Identify chord progression',
+      shortTitle: 'Progression',
+      description: 'Hear how one chord moves to the next.',
+      why: 'Most songs reuse a handful of progressions. Hearing the loop is huge.',
+      skill: 'Progressions',
+      practiceMode: 'song',
+      notes: ['C', 'F', 'G'],
+    },
+    {
+      id: 'song-reconstruct',
+      number: 39,
+      title: 'Reconstruct a song',
+      shortTitle: 'Play it',
+      description: 'Listen → understand the structure → play it yourself.',
+      why: 'This combines everything you have learned so you can figure out songs by ear.',
+      skill: 'Song detective',
+      practiceMode: 'song',
+      notes: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+      difficulty: 'hard',
+    },
+  ],
+  ['melody-guitar'],
+);
+
+const CHROMATIC = chain(
+  'chromatic',
+  [
+    {
+      id: 'chrom-sharps',
+      number: 40,
+      title: 'Sharps and flats',
+      shortTitle: '♯ / ♭',
+      description: 'The notes between the naturals. C# is between C and D.',
+      why: 'You have a foundation with the seven naturals. Now the in-between notes will make sense.',
+      skill: 'Accidentals',
+      practiceMode: 'note',
+      notes: ['C', 'C#', 'D'],
+      includeChromatic: true,
+    },
+    {
+      id: 'chrom-cs',
+      number: 41,
+      title: 'C#',
+      shortTitle: 'C#',
+      description: 'Focus on hearing C# against its neighbors.',
+      why: 'One new color at a time. C# is a common guitar note.',
+      skill: 'C# recognition',
+      practiceMode: 'note',
+      notes: ['C', 'C#', 'D'],
+      includeChromatic: true,
+    },
+    {
+      id: 'chrom-ds',
+      number: 42,
+      title: 'D#',
+      shortTitle: 'D#',
+      description: 'Add D# (Eb) to the mix.',
+      why: 'Another half-step neighbor. Keep the naturals as anchors.',
+      skill: 'D# recognition',
+      practiceMode: 'note',
+      notes: ['D', 'D#', 'E'],
+      includeChromatic: true,
+    },
+    {
+      id: 'chrom-fs',
+      number: 43,
+      title: 'F#',
+      shortTitle: 'F#',
+      description: 'Hear F# against F and G.',
+      why: 'F# is everywhere on guitar — the 2nd fret of the low E string.',
+      skill: 'F# recognition',
+      practiceMode: 'note',
+      notes: ['F', 'F#', 'G'],
+      includeChromatic: true,
+    },
+    {
+      id: 'chrom-gs',
+      number: 44,
+      title: 'G#',
+      shortTitle: 'G#',
+      description: 'Add G# between G and A.',
+      why: 'Another common accidental. Same method: neighbors first.',
+      skill: 'G# recognition',
+      practiceMode: 'note',
+      notes: ['G', 'G#', 'A'],
+      includeChromatic: true,
+    },
+    {
+      id: 'chrom-as',
+      number: 45,
+      title: 'A#',
+      shortTitle: 'A#',
+      description: 'Hear A# (Bb) against A and B.',
+      why: 'The last common sharp in this set. Then you can mix them.',
+      skill: 'A# recognition',
+      practiceMode: 'note',
+      notes: ['A', 'A#', 'B'],
+      includeChromatic: true,
+    },
+    {
+      id: 'chrom-recognition',
+      number: 46,
+      title: 'Chromatic recognition',
+      shortTitle: 'All 12',
+      description: 'All twelve pitch classes, still one at a time in questions.',
+      why: 'You are ready to hear the full chromatic set without starting there on day one.',
+      skill: 'Chromatic notes',
+      practiceMode: 'note',
+      notes: ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+      includeChromatic: true,
+      difficulty: 'hard',
+    },
+    {
+      id: 'chrom-octaves',
+      number: 47,
+      title: 'Chromatic notes across octaves',
+      shortTitle: 'Sharp octaves',
+      description: 'The same sharp or flat, high and low.',
+      why: 'Accidentals also repeat every octave. The name stays; the height changes.',
+      skill: 'Chromatic octaves',
+      practiceMode: 'one-note',
+      notes: ['C#', 'F#'],
+      octaves: [3, 4, 5],
+      includeChromatic: true,
+    },
+    {
+      id: 'chrom-melodies',
+      number: 48,
+      title: 'Chromatic melodies',
+      shortTitle: 'Chromatic tunes',
+      description: 'Short phrases that use a sharp or flat.',
+      why: 'Real songs borrow these colors. You can hear them without panic.',
+      skill: 'Chromatic melody',
+      practiceMode: 'melody',
+      notes: ['C', 'C#', 'D', 'E', 'F', 'G'],
+      includeChromatic: true,
+      difficulty: 'hard',
+    },
+  ],
+  ['song-reconstruct'],
+);
+
+export const ROADMAP_WORLDS: RoadmapWorld[] = [
+  {
+    id: 'hear',
+    title: 'Hear',
+    subtitle: 'WORLD 1',
+    description: 'Learn to recognize individual notes.',
+    icon: '♪',
+    order: 1,
+    levels: HEAR,
+  },
+  {
+    id: 'pitch',
+    title: 'Pitch',
+    subtitle: 'WORLD 2',
+    description: 'The same musical note can exist at different pitches.',
+    icon: '◎',
+    order: 2,
+    levels: PITCH,
+  },
+  {
+    id: 'guitar',
+    title: 'Guitar',
+    subtitle: 'WORLD 3',
+    description: 'Connect what the ear hears to the guitar fretboard.',
+    icon: '♮',
+    order: 3,
+    levels: GUITAR,
+  },
+  {
+    id: 'relative',
+    title: 'Relative pitch',
+    subtitle: 'WORLD 4',
+    description: 'Understand the distance between notes.',
+    icon: '↔',
+    order: 4,
+    levels: RELATIVE,
+  },
+  {
+    id: 'language',
+    title: 'Musical language',
+    subtitle: 'WORLD 5',
+    description: 'Understand notes as relationships within a key.',
+    icon: 'サ',
+    order: 5,
+    levels: LANGUAGE,
+  },
+  {
+    id: 'melody',
+    title: 'Melody',
+    subtitle: 'WORLD 6',
+    description: 'Hear and reproduce melodies.',
+    icon: '♬',
+    order: 6,
+    levels: MELODY,
+  },
+  {
+    id: 'songs',
+    title: 'Song detective',
+    subtitle: 'WORLD 7',
+    description: 'Figure out music by ear.',
+    icon: '⌕',
+    order: 7,
+    levels: SONGS,
+  },
+  {
+    id: 'chromatic',
+    title: 'Chromatic',
+    subtitle: 'WORLD 8',
+    description: 'Sharps and flats, after the natural notes feel solid.',
+    icon: '♯',
+    order: 8,
+    levels: CHROMATIC,
+  },
+];
+
+export function allRoadmapLevels(): RoadmapLevel[] {
+  return ROADMAP_WORLDS.flatMap((world) => world.levels);
+}
+
+export function getRoadmapLevel(id: string): RoadmapLevel | undefined {
+  return allRoadmapLevels().find((level) => level.id === id);
+}
+
+export function getRoadmapWorld(id: string): RoadmapWorld | undefined {
+  return ROADMAP_WORLDS.find((world) => world.id === id);
+}

@@ -2,6 +2,8 @@ import { midiToNote, type MusicalNote } from './notes';
 
 export const STANDARD_TUNING_MIDI = [40, 45, 50, 55, 59, 64] as const;
 export const STRING_NAMES = ['E', 'A', 'D', 'G', 'B', 'E'] as const;
+/** Tab-style names: low E is `E`, high E is `e`. */
+export const STRING_TAB_NAMES = ['E', 'A', 'D', 'G', 'B', 'e'] as const;
 export const STRING_LABELS = [
   '6th string (low E)',
   '5th string (A)',

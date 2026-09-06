@@ -110,10 +110,11 @@ export function ProgressDots({ current, total }: { current: number; total: numbe
 
 export function BottomNav({ go, active }: { go: Go; active: string }) {
   const items = [
-    { id: 'home', label: 'Home', screen: { id: 'home' } as const },
-    { id: 'practice', label: 'Practice', screen: { id: 'practice' } as const },
-    { id: 'lessons', label: 'Lessons', screen: { id: 'lessons' } as const },
-    { id: 'stats', label: 'Stats', screen: { id: 'stats' } as const },
+    { id: 'home', label: 'Home', icon: '⌂', screen: { id: 'home' } as const },
+    { id: 'practice', label: 'Practice', icon: '♪', screen: { id: 'practice' } as const },
+    { id: 'journey', label: 'Journey', icon: '◆', screen: { id: 'journey' } as const },
+    { id: 'progress', label: 'Progress', icon: '✦', screen: { id: 'stats' } as const },
+    { id: 'settings', label: 'Settings', icon: '⚙', screen: { id: 'settings' } as const },
   ];
   return (
     <nav className="bottom-nav" aria-label="Main">
@@ -124,6 +125,9 @@ export function BottomNav({ go, active }: { go: Go; active: string }) {
           className={active === item.id ? 'active' : ''}
           onClick={() => go(item.screen)}
         >
+          <span className="nav-icon" aria-hidden="true">
+            {item.icon}
+          </span>
           {item.label}
         </button>
       ))}

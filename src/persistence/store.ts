@@ -1,6 +1,8 @@
 import { DEFAULT_THRESHOLDS } from '../music/progression';
 import type {
   AnswerRecord,
+  JourneyLevelStat,
+  JourneyState,
   NoteStat,
   SessionSummary,
   UserProgress,
@@ -57,7 +59,16 @@ export function defaultProgress(): UserProgress {
     history: [],
     achievements: [],
     totalCorrect: 0,
+    journey: emptyJourney(),
   };
+}
+
+export function emptyJourney(): JourneyState {
+  return { stats: {}, celebrated: [] };
+}
+
+export function emptyLevelStat(): JourneyLevelStat {
+  return { questions: 0, correct: 0, sessions: 0, bestAccuracy: 0, lastAccuracy: 0 };
 }
 
 export function loadProgress(): UserProgress {
@@ -82,6 +93,12 @@ function migrate(progress: Partial<UserProgress>): UserProgress {
     ...defaultProgress(),
     ...progress,
     settings: { ...defaultSettings(), ...progress.settings, soundSource: progress.settings?.soundSource ?? 'samples' },
+    journey: {
+      ...emptyJourney(),
+      ...progress.journey,
+      stats: progress.journey?.stats ?? {},
+      celebrated: progress.journey?.celebrated ?? [],
+    },
     version: 1,
   };
 }
@@ -116,7 +133,7 @@ export function recordAnswer(progress: UserProgress, answer: AnswerRecord): User
     stat.firstAttemptTotal += 1;
     if (answer.correct) stat.firstAttemptCorrect += 1;
   }
-  return unlockAchievements(next);
+  return unlockAchievements(applyJourneyAnswer(next, answer));
 }
 
 export function completeSession(
@@ -124,6 +141,7 @@ export function completeSession(
   summary: SessionSummary,
 ): UserProgress {
   let next = applyStreak(recordHistory(progress, summary));
+  next = applyJourneySession(next, summary);
   next = { ...next, xp: next.xp + 50, onboarded: true };
   if (summary.mode === 'melody' || summary.mode === 'song') {
     next = unlock(next, 'first_melody');
@@ -222,6 +240,7 @@ export function summarizeSession(
   answers: AnswerRecord[],
   notes: SessionSummary['notes'],
   mode: SessionSummary['mode'],
+  levelId?: string,
 ): SessionSummary {
   const perNote: SessionSummary['perNote'] = {};
   let correct = 0;
@@ -251,5 +270,78 @@ export function summarizeSession(
     questionCount: answers.length,
     replayCount,
     perNote,
+    levelId,
   };
+}
+
+function applyJourneyAnswer(progress: UserProgress, answer: AnswerRecord): UserProgress {
+  const levelId = progress.journey?.activeLevelId;
+  if (!levelId) return progress;
+  const journey = progress.journey ?? emptyJourney();
+  const prev = journey.stats[levelId] ?? emptyLevelStat();
+  const questions = prev.questions + 1;
+  const correct = prev.correct + (answer.correct ? 1 : 0);
+  const accuracy = questions ? correct / questions : 0;
+  return {
+    ...progress,
+    journey: {
+      ...journey,
+      stats: {
+        ...journey.stats,
+        [levelId]: {
+          ...prev,
+          questions,
+          correct,
+          lastAccuracy: accuracy,
+          bestAccuracy: Math.max(prev.bestAccuracy, accuracy),
+        },
+      },
+    },
+  };
+}
+
+function applyJourneySession(progress: UserProgress, summary: SessionSummary): UserProgress {
+  const levelId = summary.levelId ?? progress.journey?.activeLevelId;
+  if (!levelId) return progress;
+  const journey = progress.journey ?? emptyJourney();
+  const prev = journey.stats[levelId] ?? emptyLevelStat();
+  return {
+    ...progress,
+    journey: {
+      ...journey,
+      stats: {
+        ...journey.stats,
+        [levelId]: {
+          ...prev,
+          sessions: prev.sessions + 1,
+          lastAccuracy: summary.accuracy,
+          bestAccuracy: Math.max(prev.bestAccuracy, summary.accuracy),
+        },
+      },
+    },
+  };
+}
+
+export function recordJourneyHit(progress: UserProgress, correct: boolean): UserProgress {
+  return applyJourneyAnswer(progress, {
+    questionId: `journey-${Date.now()}`,
+    expected: 'C',
+    expectedMidi: 0,
+    selected: correct ? 'C' : 'D',
+    correct,
+    firstAttempt: true,
+    replayCount: 0,
+    mode: 'interval',
+  });
+}
+
+export function setActiveLevel(progress: UserProgress, levelId?: string): UserProgress {
+  const journey = progress.journey ?? emptyJourney();
+  return { ...progress, journey: { ...journey, activeLevelId: levelId } };
+}
+
+export function markCelebrated(progress: UserProgress, levelIds: string[]): UserProgress {
+  const journey = progress.journey ?? emptyJourney();
+  const celebrated = [...new Set([...journey.celebrated, ...levelIds])];
+  return { ...progress, journey: { ...journey, celebrated } };
 }

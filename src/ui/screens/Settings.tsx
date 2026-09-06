@@ -9,7 +9,7 @@ import {
 } from '../../music/naming';
 import { resetProgress, useProgress } from '../context/ProgressContext';
 import { adsConfigured } from '../../ads/config';
-import { Chip, TopBar } from '../components/widgets';
+import { BottomNav, Chip, TopBar } from '../components/widgets';
 import type { Go } from '../nav';
 
 export function Settings({ go }: { go: Go }) {
@@ -17,7 +17,8 @@ export function Settings({ go }: { go: Go }) {
   const settings = progress.settings;
 
   return (
-    <main className="screen">
+    <div className="app-shell">
+      <main className="screen">
       <TopBar title="Settings" onBack={() => go({ id: 'home' })} />
       <section className="stack">
         <h2>Note system</h2>
@@ -190,7 +191,7 @@ export function Settings({ go }: { go: Go }) {
         </p>
         <p className="muted">
           {adsConfigured
-            ? 'Ad IDs are set. Banners can load on Home, Lessons, Stats, Settings, and session complete.'
+            ? 'Ad IDs are set. Banners can load on Home, Journey, Lessons, Progress, Settings, and session complete.'
             : 'Waiting for an ad slot ID. The verification tag is in place; banners stay hidden until the slot is added.'}
         </p>
 
@@ -207,6 +208,8 @@ export function Settings({ go }: { go: Go }) {
           Reset local progress
         </button>
       </section>
-    </main>
+      </main>
+      <BottomNav go={go} active="settings" />
+    </div>
   );
 }
