@@ -44,7 +44,14 @@ describe('quiz engine', () => {
       difficulty: 'easy',
       octaves: [4],
     });
-    expect(easy.octaves).toEqual([3, 4]);
+    expect(easy.octaves).toEqual([4]);
+    const mixed = applyDifficulty({
+      ...defaultConfig('note', ['C', 'D', 'E']),
+      difficulty: 'easy',
+      octaves: [4],
+      mixOctaves: true,
+    });
+    expect(mixed.octaves).toEqual([3, 4]);
   });
 
   it('weights weak notes more heavily', () => {

@@ -14,6 +14,22 @@ export function LessonList({ go }: { go: Go }) {
       <main className="screen">
         <TopBar title="Lessons" onBack={() => go({ id: 'home' })} />
         <p className="lede">Skip freely. Lessons are a path, not a gate.</p>
+        <article className="seo-guide">
+          <h2>Read first, then listen</h2>
+          <p>
+            Each lesson is a short explanation of one idea — what a note is, why C vs D comes
+            first, how octaves repeat, how the same pitch lives on more than one guitar string.
+            After you read, you can practice that idea. Longer guides live on
+            {' '}
+            <a href="/ear-training.html">ear training</a>,
+            {' '}
+            <a href="/guitar-ear-training.html">guitar by ear</a>,
+            {' '}
+            <a href="/learn-notes.html">learn notes</a>, and
+            {' '}
+            <a href="/how-to-practice.html">how to practice</a>.
+          </p>
+        </article>
         <ol className="lesson-list">
           {LESSONS.map((lesson) => {
             const done = progress.completedLessons.includes(lesson.id);
@@ -52,6 +68,7 @@ export function LessonView({ go, lessonId }: { go: Go; lessonId: string }) {
         config: applyDifficulty({
           ...defaultConfig('note', lesson.practiceNotes as NoteName[]),
           instrument: progress.settings.instrument,
+          mixOctaves: progress.settings.mixOctaves,
         }),
       });
       return;

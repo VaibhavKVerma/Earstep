@@ -18,8 +18,6 @@ import { Settings } from './ui/screens/Settings';
 import { Stats } from './ui/screens/Stats';
 import { Training } from './ui/screens/Training';
 import { Onboarding, Welcome } from './ui/screens/Welcome';
-import { AdBanner } from './ads/AdBanner';
-import { shouldShowAd } from './ads/config';
 import { MusicBackdrop } from './ui/components/MusicBackdrop';
 import { SiteFooter } from './ui/components/widgets';
 
@@ -57,7 +55,6 @@ export default function App() {
     <div className="app-root">
       <MusicBackdrop />
       <div className="app-main">{body}</div>
-      {shouldShowAd(screen.id) && <AdBanner />}
       <SiteFooter />
     </div>
   );

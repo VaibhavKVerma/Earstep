@@ -23,6 +23,7 @@ export interface PracticeConfig {
   difficulty: Difficulty;
   mode: PracticeMode;
   includeChromatic?: boolean;
+  mixOctaves?: boolean;
   noteWeights?: Record<string, number>;
   levelId?: string;
 }
@@ -76,6 +77,7 @@ export interface UserSettings {
   theme: 'dark' | 'light';
   volume: number;
   showScientific: boolean;
+  mixOctaves: boolean;
   a4: number;
   thresholds: {
     stay: number;

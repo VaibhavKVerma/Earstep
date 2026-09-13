@@ -64,6 +64,7 @@ export function PracticeSetup({ go }: { go: Go }) {
       instrument,
       questionCount: count,
       difficulty,
+      mixOctaves: progress.settings.mixOctaves,
       ...overrides,
       notes: overrides.notes ?? safeNotes,
     });
@@ -88,14 +89,34 @@ export function PracticeSetup({ go }: { go: Go }) {
             Include sharps
           </label>
 
-          <h2>Octaves</h2>
-          <div className="chip-row">
-            {[2, 3, 4, 5].map((octave) => (
-              <Chip key={octave} active={octaves.includes(octave)} onClick={() => toggleOctave(octave)}>
-                {octave === 3 ? 'Low' : octave === 4 ? 'Middle' : octave === 5 ? 'High' : 'Very low'} {octave}
-              </Chip>
-            ))}
-          </div>
+          <h2>Pitch height</h2>
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={progress.settings.mixOctaves}
+              onChange={(e) =>
+                update((current) => ({
+                  ...current,
+                  settings: { ...current.settings, mixOctaves: e.target.checked },
+                }))
+              }
+            />
+            Mix high and low pitches
+          </label>
+          <p className="muted">
+            {progress.settings.mixOctaves
+              ? 'The same letter can be low or high. Harder.'
+              : 'Every note stays the same height. You only name the letter.'}
+          </p>
+          {progress.settings.mixOctaves && (
+            <div className="chip-row">
+              {[2, 3, 4, 5].map((octave) => (
+                <Chip key={octave} active={octaves.includes(octave)} onClick={() => toggleOctave(octave)}>
+                  {octave === 3 ? 'Low' : octave === 4 ? 'Middle' : octave === 5 ? 'High' : 'Very low'} {octave}
+                </Chip>
+              ))}
+            </div>
+          )}
 
           <h2>Sound</h2>
           <div className="chip-row">
@@ -317,6 +338,7 @@ export function DailyTraining({ go }: { go: Go }) {
               ...defaultConfig('note', notes),
               instrument: progress.settings.instrument,
               questionCount: 6,
+              mixOctaves: progress.settings.mixOctaves,
             }),
           })
         }

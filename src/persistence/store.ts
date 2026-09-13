@@ -39,6 +39,7 @@ export function defaultSettings(): UserSettings {
     theme: 'light',
     volume: 0.7,
     showScientific: false,
+    mixOctaves: false,
     a4: 440,
     thresholds: { ...DEFAULT_THRESHOLDS },
   };

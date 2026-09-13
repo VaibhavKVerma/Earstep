@@ -108,6 +108,25 @@ export function Settings({ go }: { go: Go }) {
           ))}
         </div>
 
+        <h2>Pitch height</h2>
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={settings.mixOctaves}
+            onChange={(e) =>
+              update((current) => ({
+                ...current,
+                settings: { ...current.settings, mixOctaves: e.target.checked },
+              }))
+            }
+          />
+          Mix high and low pitches
+        </label>
+        <p className="muted">
+          Off: C, D, and E stay the same height so you only learn the letter. On: the same
+          letter can be low or high.
+        </p>
+
         <h2>Appearance</h2>
         <div className="chip-row">
           {(['dark', 'light'] as const).map((theme) => (

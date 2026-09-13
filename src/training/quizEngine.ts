@@ -39,8 +39,10 @@ export function durationForDifficulty(difficulty: Difficulty): number {
 
 export function applyDifficulty(config: PracticeConfig): PracticeConfig {
   const preset = DIFFICULTY_PRESETS[config.difficulty];
-  if (config.difficulty === 'beginner') {
-    return { ...config, octaves: [config.octaves[0] ?? 4] };
+  const mix = Boolean(config.mixOctaves);
+  if (!mix || config.difficulty === 'beginner') {
+    const preferred = config.octaves.includes(4) ? 4 : (config.octaves[0] ?? 4);
+    return { ...config, octaves: [preferred] };
   }
   if (config.octaves.length === 1) {
     return { ...config, octaves: preset.octaves };

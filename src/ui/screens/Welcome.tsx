@@ -33,11 +33,23 @@ export function Welcome({ go }: { go: Go }) {
           find it on guitar. That is guitar ear training and note training in the same place.
         </p>
         <p>
+          Most apps dump every chromatic pitch on day one. Here you start with C and D. When
+          those two are obvious, you add E, then height (low / middle / high), then the
+          fretboard. Lessons explain the idea. Practice checks the ear. Journey is the
+          recommended order — not a lock.
+        </p>
+        <p>
           <a href="/ear-training.html">What is ear training?</a>
           {' · '}
           <a href="/guitar-ear-training.html">Learn guitar by ear</a>
           {' · '}
           <a href="/learn-notes.html">Learn musical notes</a>
+          {' · '}
+          <a href="/how-to-practice.html">How to practice</a>
+          {' · '}
+          <a href="/guides.html">All guides</a>
+          {' · '}
+          <a href="/about.html">About</a>
         </p>
       </article>
     </main>

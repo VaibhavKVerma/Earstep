@@ -22,7 +22,7 @@ const MODES: { id: PracticeMode | 'custom'; icon: string; title: string; text: s
 ];
 
 export function Home({ go }: { go: Go }) {
-  const { progress, level } = useProgress();
+  const { progress, level, update } = useProgress();
   const notes = progress.selectedNotes;
   const advice = adviseProgression(notes, accuracyMap(progress), progress.settings.thresholds);
   const nextLesson = LESSONS.find((lesson) => !progress.completedLessons.includes(lesson.id));
@@ -55,6 +55,19 @@ export function Home({ go }: { go: Go }) {
             {notes.map((name) => displayNameForNoteName(name, progress.settings.noteSystem, progress.settings.tonicPitchClass)).join('  ·  ')}
           </h2>
           <p>{advice.message}</p>
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={progress.settings.mixOctaves}
+              onChange={(e) =>
+                update((current) => ({
+                  ...current,
+                  settings: { ...current.settings, mixOctaves: e.target.checked },
+                }))
+              }
+            />
+            Mix high and low pitches
+          </label>
           <div className="row">
             <button
               type="button"
@@ -69,6 +82,7 @@ export function Home({ go }: { go: Go }) {
                     instrument: progress.settings.instrument,
                     questionCount: 16,
                     difficulty: notes.length <= 2 ? 'beginner' : 'easy',
+                    mixOctaves: progress.settings.mixOctaves,
                   }),
                 })
               }

@@ -14,6 +14,7 @@ export function configForLevel(level: RoadmapLevel, progress: UserProgress): Pra
     questionCount: level.questionCount ?? 16,
     difficulty: level.difficulty,
     includeChromatic: level.includeChromatic,
+    mixOctaves: (level.octaves?.length ?? 0) > 1 || progress.settings.mixOctaves,
     levelId: level.id,
     mode: level.practiceMode === 'higher-lower' ? 'interval' : level.practiceMode,
   });

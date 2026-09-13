@@ -27,7 +27,7 @@ export const LESSONS: Lesson[] = [
     pages: [
       {
         heading: 'A note is a named pitch',
-        body: 'When a guitar string vibrates, it makes a pitch — how high or low the sound is. Musicians give the most useful pitches simple names: C, D, E, F, G, A, and B.',
+        body: 'When a guitar string vibrates, it makes a pitch — how high or low the sound is. Musicians give the most useful pitches simple names: C, D, E, F, G, A, and B. Those names repeat higher up. The letter is the identity. The octave is the height. Earstep teaches the letter first.',
       },
       {
         heading: 'You already hear differences',
