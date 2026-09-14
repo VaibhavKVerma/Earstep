@@ -34,6 +34,10 @@ export interface QuizQuestion {
   options: NoteName[];
   compareNote?: MusicalNote;
   melody?: MusicalNote[];
+  melodyChoices?: { key: string; notes: MusicalNote[]; correct: boolean }[];
+  melodyName?: string;
+  melodyHint?: string;
+  includePitch?: boolean;
   intervalId?: IntervalId;
 }
 

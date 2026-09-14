@@ -68,7 +68,11 @@ export function PracticeSetup({ go }: { go: Go }) {
       ...overrides,
       notes: overrides.notes ?? safeNotes,
     });
-    go({ id: 'train', config, heading: formatNoteSet(config.notes) });
+    go({
+      id: 'train',
+      config,
+      heading: config.mode === 'melody' ? `Melody · ${formatNoteSet(config.notes)}` : formatNoteSet(config.notes),
+    });
   }
 
   return (
@@ -162,6 +166,14 @@ export function PracticeSetup({ go }: { go: Go }) {
           <button type="button" className="primary xl" onClick={() => start()} disabled={notes.length < 2}>
             Start practice
           </button>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => start({ mode: 'melody', questionCount: 4 })}
+            disabled={notes.length < 2}
+          >
+            Start melody quiz
+          </button>
         </section>
       </main>
       <BottomNav go={go} active="practice" />
@@ -185,8 +197,9 @@ export function SessionComplete({
     ...item,
     misses: item.total - Math.round(item.accuracy * item.total),
   }));
-  const [freshlyMastered] = useState(() => uncelebratedMasteries(progress));
-  const celebration = freshlyMastered[0];
+  const inJourney = Boolean(config.levelId);
+  const [freshlyMastered] = useState(() => (inJourney ? uncelebratedMasteries(progress) : []));
+  const celebration = inJourney ? freshlyMastered[0] : undefined;
   const journey = buildJourney(progress);
   const unlocked = celebration
     ? journey.levels.find((item) => item.level.number === celebration.level.number + 1)
@@ -243,11 +256,11 @@ export function SessionComplete({
           <strong>{weak[0].name}</strong> is currently your hardest note.
         </p>
       )}
-      <p>{celebration ? `You've mastered ${celebration.level.title}.` : advice.message}</p>
+      <p>{advice.message}</p>
       {!celebration && summary.accuracy < 0.85 && <p>Keep practicing. You&apos;re getting there.</p>}
       <div className="stack">
-        <button type="button" className="primary" onClick={() => go({ id: 'train', config, heading: formatNoteSet(config.notes) })}>
-          Practice {formatNoteSet(config.notes)} again
+        <button type="button" className="primary" onClick={() => go({ id: 'train', config, heading: config.mode === 'melody' ? `Melody · ${formatNoteSet(config.notes)}` : formatNoteSet(config.notes) })}>
+          Practice {config.mode === 'melody' ? 'these phrases' : formatNoteSet(config.notes)} again
         </button>
         {celebration && unlocked && (
           <button
@@ -270,7 +283,7 @@ export function SessionComplete({
               update((current) => ({ ...current, selectedNotes: notes }));
               go({
                 id: 'train',
-                heading: formatNoteSet(notes),
+                heading: config.mode === 'melody' ? `Melody · ${formatNoteSet(notes)}` : formatNoteSet(notes),
                 config: { ...config, notes, difficulty: notes.length <= 3 ? 'easy' : config.difficulty },
               });
             }}

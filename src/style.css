@@ -699,6 +699,11 @@ p {
   text-align: center;
 }
 
+.train-stage .stack {
+  width: 100%;
+  text-align: left;
+}
+
 .play-btn {
   width: min(200px, 58vw);
   height: min(200px, 58vw);
@@ -773,6 +778,12 @@ p {
   font-size: 1.25rem;
   font-weight: 800;
   position: relative;
+}
+
+.stack > .choice {
+  width: 100%;
+  text-align: left;
+  padding-inline: 1.1rem;
 }
 
 .choice small {

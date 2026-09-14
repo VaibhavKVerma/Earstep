@@ -1,6 +1,6 @@
 import { displayNameForNoteName } from '../../music/naming';
 import { NOTE_STAGES, adviseProgression, formatNoteSet, stageForNotes } from '../../music/progression';
-import { accuracyMap } from '../../persistence/store';
+import { accuracyMap, setActiveLevel } from '../../persistence/store';
 import { buildJourney } from '../../training/journey';
 import { LESSONS } from '../../training/lessons';
 import { applyDifficulty, defaultConfig } from '../../training/quizEngine';
@@ -10,13 +10,20 @@ import { BottomNav } from '../components/widgets';
 import { useProgress } from '../context/ProgressContext';
 import type { Go } from '../nav';
 
-const MODES: { id: PracticeMode | 'custom'; icon: string; title: string; text: string; screen: Parameters<Go>[0] }[] = [
+const MODES: {
+  id: PracticeMode | 'custom' | 'melody-quiz';
+  icon: string;
+  title: string;
+  text: string;
+  screen?: Parameters<Go>[0];
+}[] = [
   { id: 'note', icon: '♪', title: 'Note recognition', text: 'Hear a note. Name it.', screen: { id: 'practice' } },
   { id: 'one-note', icon: '↕', title: 'One note, many pitches', text: 'Same letter, different height.', screen: { id: 'one-note' } },
   { id: 'octave', icon: '⇅', title: 'Low / middle / high', text: 'Which octave did you hear?', screen: { id: 'octave' } },
   { id: 'guitar', icon: '🎸', title: 'Find it on guitar', text: 'Hear it, then tap a fret.', screen: { id: 'guitar-find' } },
   { id: 'interval', icon: '↔', title: 'Intervals', text: 'How far apart are two notes?', screen: { id: 'intervals' } },
-  { id: 'melody', icon: '♫', title: 'Melodies', text: 'Follow a short phrase.', screen: { id: 'melody' } },
+  { id: 'melody', icon: '♫', title: 'Melodies', text: 'Choose notes. Mix pitch if you want.', screen: { id: 'melody' } },
+  { id: 'melody-quiz', icon: '☰', title: 'Melody quiz', text: 'Name each note in a longer phrase.' },
   { id: 'song', icon: '♬', title: 'Learn from songs', text: 'Name each note, then pick Low, Middle, or High.', screen: { id: 'song' } },
   { id: 'hear-sing-find', icon: '🎤', title: 'Hear → Sing → Find', text: 'Listen, hum, then find it.', screen: { id: 'hear-sing-find' } },
 ];
@@ -154,7 +161,30 @@ export function Home({ go }: { go: Go }) {
           <h3>Practice modes</h3>
           <div className="mode-grid">
             {MODES.map((mode) => (
-              <button key={mode.title} type="button" className="card mode-card" onClick={() => go(mode.screen)}>
+              <button
+                key={mode.title}
+                type="button"
+                className="card mode-card"
+                onClick={() => {
+                  if (mode.id === 'melody-quiz') {
+                    update((current) => setActiveLevel(current, undefined));
+                    go({
+                      id: 'train',
+                      heading: `Melody · ${formatNoteSet(notes)}`,
+                      config: applyDifficulty({
+                        ...defaultConfig('melody', notes),
+                        octaves: progress.selectedOctaves,
+                        instrument: progress.settings.instrument,
+                        questionCount: 4,
+                        difficulty: notes.length <= 2 ? 'beginner' : 'easy',
+                        mixOctaves: progress.settings.mixOctaves,
+                      }),
+                    });
+                    return;
+                  }
+                  if (mode.screen) go(mode.screen);
+                }}
+              >
                 <span className="mode-icon" aria-hidden="true">
                   {mode.icon}
                 </span>

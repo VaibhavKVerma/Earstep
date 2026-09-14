@@ -72,4 +72,48 @@ describe('quiz engine', () => {
       expect([3, 4, 5]).toContain(question.note.octave);
     }
   });
+
+  it('builds a melody quiz from the selected notes', () => {
+    const questions = generateQuestions({
+      notes: ['C', 'D'],
+      octaves: [4],
+      instrument: 'acoustic',
+      questionCount: 6,
+      difficulty: 'beginner',
+      mode: 'melody',
+    });
+    expect(questions).toHaveLength(6);
+    for (const question of questions) {
+      expect(question.melody).toHaveLength(10);
+      for (const note of question.melody ?? []) {
+        expect(['C', 'D']).toContain(note.name);
+        expect(note.octave).toBe(4);
+      }
+      expect(question.options).toEqual(['C', 'D']);
+      expect(question.includePitch).toBe(false);
+    }
+  });
+
+  it('keeps melody quiz phrases inside a larger note set', () => {
+    const notes = ['C', 'D', 'E', 'F', 'G'] as const;
+    const questions = generateQuestions({
+      notes: [...notes],
+      octaves: [3, 4, 5],
+      instrument: 'acoustic',
+      questionCount: 8,
+      difficulty: 'easy',
+      mode: 'melody',
+      mixOctaves: true,
+    });
+    expect(questions).toHaveLength(8);
+    for (const question of questions) {
+      expect(question.includePitch).toBe(true);
+      expect(question.melody).toHaveLength(10);
+      expect(question.options).toEqual([...notes]);
+      for (const note of question.melody ?? []) {
+        expect(notes).toContain(note.name);
+        expect([3, 4, 5]).toContain(note.octave);
+      }
+    }
+  });
 });

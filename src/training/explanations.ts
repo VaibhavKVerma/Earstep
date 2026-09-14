@@ -18,11 +18,15 @@ export function noteExplanation(
     };
   }
 
-  const chosen = displayNameForNoteName(selected, system, tonic);
+  const chosen = isNoteName(selected) ? displayNameForNoteName(selected, system, tonic) : selected;
   return {
     title: `Not quite. You chose ${chosen}.`,
     body: `The note was ${heard} (${scientific}). Don't worry about the octave yet. Listen again and notice how ${heard} feels different from ${chosen}.`,
   };
+}
+
+function isNoteName(value: string): boolean {
+  return /^[A-Ga-g](?:#|b)?$/.test(value.trim());
 }
 
 export function octaveExplanation(note: MusicalNote, correct: boolean): { title: string; body: string } {

@@ -1,3 +1,4 @@
+import { generateMusicalPhrase, MELODY_QUIZ_LENGTH } from '../music/phrases';
 import type { IntervalId } from '../music/intervals';
 import { midiToNote, noteFromName, notesInRange, type NoteName } from '../music/notes';
 import type { Difficulty, PracticeConfig, PracticeMode, QuizQuestion } from './types';
@@ -51,6 +52,7 @@ export function applyDifficulty(config: PracticeConfig): PracticeConfig {
 }
 
 export function generateQuestions(config: PracticeConfig): QuizQuestion[] {
+  if (config.mode === 'melody') return generateMelodyQuestions(config);
   const resolved = applyDifficulty(config);
   const notes = resolved.notes.length >= 2 ? resolved.notes : (['C', 'D'] as NoteName[]);
   const octaves = resolved.octaves.length ? resolved.octaves : [4];
@@ -78,6 +80,35 @@ export function generateQuestions(config: PracticeConfig): QuizQuestion[] {
       id: `q-${i}-${note.midi}-${Math.random().toString(36).slice(2, 7)}`,
       note,
       options: [...notes],
+    });
+  }
+  return questions;
+}
+
+export function generateMelodyQuestions(config: PracticeConfig): QuizQuestion[] {
+  const resolved = applyDifficulty(config);
+  const notes = resolved.notes.length >= 2 ? resolved.notes : (['C', 'D'] as NoteName[]);
+  const mix = Boolean(resolved.mixOctaves);
+  const octaves = resolved.octaves.length ? resolved.octaves : [4];
+  const askPitch = mix && octaves.length > 1;
+  const questions: QuizQuestion[] = [];
+
+  for (let i = 0; i < resolved.questionCount; i++) {
+    const phrase = generateMusicalPhrase({
+      notes,
+      octaves,
+      mixOctaves: mix,
+      length: MELODY_QUIZ_LENGTH,
+    });
+    const first = phrase.notes[0] ?? noteFromName(notes[0], octaves[0] ?? 4);
+    questions.push({
+      id: `mel-${i}-${phrase.id}`,
+      note: first,
+      options: [...notes],
+      melody: phrase.notes,
+      melodyName: phrase.name,
+      melodyHint: phrase.hint,
+      includePitch: askPitch,
     });
   }
   return questions;

@@ -4,6 +4,7 @@ import { INTERVALS, INTERVAL_LEVELS, INTERVAL_REFERENCES, intervalFromSemitones,
 import { isCorrectFret, noteAtFret } from '../../music/guitar';
 import { displayNameForNoteName } from '../../music/naming';
 import {
+  CHROMATIC_NAMES,
   formatScientific,
   humanOctaveName,
   NATURAL_NAMES,
@@ -11,6 +12,11 @@ import {
   octaveLabel,
   type NoteName,
 } from '../../music/notes';
+import {
+  buildPhraseChoices,
+  formatPhraseLabel,
+  generateMusicalPhrase,
+} from '../../music/phrases';
 import { PUBLIC_DOMAIN_SONGS, melodyDirection } from '../../music/songs';
 import { completeSession, grantAchievement, recordAnswer, recordJourneyHit, summarizeSession } from '../../persistence/store';
 import { guitarExplanation, octaveExplanation } from '../../training/explanations';
@@ -23,9 +29,18 @@ import {
 } from '../../training/quizEngine';
 import type { AnswerRecord } from '../../training/types';
 import { Fretboard } from '../components/Fretboard';
-import { NoteChoices, PlayButton, TopBar } from '../components/widgets';
+import { Chip, NoteChoices, PlayButton, TopBar } from '../components/widgets';
 import { useProgress } from '../context/ProgressContext';
 import type { Go } from '../nav';
+
+const MELODY_FALLBACK_NOTES: NoteName[] = ['C', 'D'];
+const MELODY_MIX_OCTAVES = [3, 4, 5];
+const MELODY_PINNED_OCTAVE = [4];
+const SONG_PITCHES = [
+  { id: 'low' as const, octave: 3, title: 'Low' },
+  { id: 'middle' as const, octave: 4, title: 'Middle' },
+  { id: 'high' as const, octave: 5, title: 'High' },
+];
 
 export function OneNoteMany({ go }: { go: Go }) {
   const { progress } = useProgress();
@@ -390,73 +405,224 @@ export function IntervalTraining({ go }: { go: Go }) {
 
 export function MelodyTraining({ go }: { go: Go }) {
   const { progress, update } = useProgress();
-  const phrase = useMemo(() => {
-    const a = noteFromName(progress.selectedNotes[0] ?? 'C', 4);
-    const b = noteFromName(progress.selectedNotes[1] ?? 'D', 4);
-    const c = noteFromName(progress.selectedNotes[2] ?? progress.selectedNotes[0] ?? 'E', 4);
-    return [a, b, c, b];
-  }, [progress.selectedNotes]);
-  const [mode, setMode] = useState<'first' | 'direction' | 'sequence'>('first');
-  const [done, setDone] = useState<string | null>(null);
+  const [round, setRound] = useState(0);
+  const [mode, setMode] = useState<'first' | 'direction' | 'sequence'>('sequence');
+  const [picked, setPicked] = useState<string | null>(null);
+  const [ok, setOk] = useState<boolean | null>(null);
+  const [named, setNamed] = useState<NoteName | null>(null);
+  const [chromatic, setChromatic] = useState(
+    () => progress.selectedNotes.some((name) => !(NATURAL_NAMES as readonly string[]).includes(name)),
+  );
+  const system = progress.settings.noteSystem;
+  const tonic = progress.settings.tonicPitchClass;
+  const mix = progress.settings.mixOctaves;
+  const pool = chromatic ? CHROMATIC_NAMES : NATURAL_NAMES;
+  const scaleNotes = progress.selectedNotes.length >= 2 ? progress.selectedNotes : MELODY_FALLBACK_NOTES;
+  const octaves = mix
+    ? progress.selectedOctaves.length
+      ? progress.selectedOctaves
+      : MELODY_MIX_OCTAVES
+    : MELODY_PINNED_OCTAVE;
+  const askPitch = mix && octaves.length > 1;
+
+  const phrase = useMemo(
+    () => generateMusicalPhrase({ notes: scaleNotes, octaves, mixOctaves: mix }),
+    [round, scaleNotes, octaves, mix],
+  );
+  const choices = useMemo(
+    () => buildPhraseChoices(phrase, scaleNotes, Math.random, askPitch ? octaves : []),
+    [phrase, scaleNotes, askPitch, octaves],
+  );
+  const heard = phrase.notes;
+  const first = heard[0] ?? noteFromName('C', 4);
+  const direction = heard.length >= 2 ? melodyDirection(heard[0], heard[1]) : 'same';
+  const display = (name: NoteName) => displayNameForNoteName(name, system, tonic);
+  const phraseLabel = formatPhraseLabel(heard, display, askPitch);
+  const guessedLabel = named ? display(named) : '';
+  const answered = ok !== null;
+
+  function resetAnswer() {
+    setPicked(null);
+    setOk(null);
+    setNamed(null);
+  }
+
+  function toggleNote(name: NoteName) {
+    update((current) => {
+      const has = current.selectedNotes.includes(name);
+      const next = has ? current.selectedNotes.filter((item) => item !== name) : [...current.selectedNotes, name];
+      return { ...current, selectedNotes: next.length >= 2 ? next : current.selectedNotes };
+    });
+    resetAnswer();
+  }
+
+  function toggleOctave(octave: number) {
+    update((current) => {
+      const has = current.selectedOctaves.includes(octave);
+      const next = has ? current.selectedOctaves.filter((item) => item !== octave) : [...current.selectedOctaves, octave];
+      return { ...current, selectedOctaves: next.length ? next : current.selectedOctaves };
+    });
+    resetAnswer();
+  }
+
+  function setMix(on: boolean) {
+    update((current) => ({
+      ...current,
+      settings: { ...current.settings, mixOctaves: on },
+    }));
+    resetAnswer();
+  }
 
   async function play() {
     await audioEngine.playSequence(
-      phrase.map((note) => note.frequency),
+      heard.map((note) => note.frequency),
       { instrument: progress.settings.instrument, duration: 0.45, gap: 0.1 },
     );
   }
 
-  const sequences = [
-    phrase.map((n) => n.name).join(' '),
-    [phrase[0].name, phrase[2].name, phrase[1].name, phrase[0].name].join(' '),
-    [phrase[1].name, phrase[2].name, phrase[0].name, phrase[1].name].join(' '),
-  ];
+  function finish(correct: boolean, selected: string) {
+    if (answered) return;
+    setOk(correct);
+    setPicked(selected);
+    const summary = summarizeSession(
+      [
+        {
+          questionId: phrase.id,
+          expected: first.name,
+          expectedMidi: first.midi,
+          selected,
+          correct,
+          firstAttempt: true,
+          replayCount: 0,
+          mode: 'melody',
+        },
+      ],
+      scaleNotes,
+      'melody',
+      progress.journey?.activeLevelId,
+    );
+    update((current) => completeSession(current, summary));
+  }
 
-  function finish(ok: boolean, label: string) {
-    setDone(ok ? `Yes — ${label}` : `Not quite. ${label}`);
-    if (ok) {
-      const summary = summarizeSession(
-        [
-          {
-            questionId: 'mel-1',
-            expected: phrase[0].name,
-            expectedMidi: phrase[0].midi,
-            selected: phrase[0].name,
-            correct: true,
-            firstAttempt: true,
-            replayCount: 0,
-            mode: 'melody',
-          },
-        ],
-        progress.selectedNotes,
-        'melody',
-      );
-      update((current) => completeSession(current, summary));
-    }
+  function nextPhrase() {
+    resetAnswer();
+    setRound((n) => n + 1);
+  }
+
+  function switchMode(next: typeof mode) {
+    setMode(next);
+    resetAnswer();
   }
 
   return (
     <main className="screen">
       <TopBar title="Melody" onBack={() => go(progress.journey?.activeLevelId ? { id: 'journey' } : { id: 'home' })} />
+      <p className="lede">
+        Real song shapes — steps, turns, repeats, and little leaps. Choose the notes. Pitch is optional, like note recognition.
+      </p>
+
+      <section className="stack">
+        <h2>Notes</h2>
+        <div className="chip-row">
+          {pool.map((name) => (
+            <Chip key={name} active={scaleNotes.includes(name)} onClick={() => toggleNote(name)}>
+              {display(name)}
+            </Chip>
+          ))}
+        </div>
+        <label className="check">
+          <input type="checkbox" checked={chromatic} onChange={(e) => setChromatic(e.target.checked)} />
+          Include sharps
+        </label>
+
+        <h2>Pitch height</h2>
+        <label className="check">
+          <input type="checkbox" checked={mix} onChange={(e) => setMix(e.target.checked)} />
+          Mix high and low pitches
+        </label>
+        <p className="muted">
+          {mix
+            ? 'The same letter can be low or high. Answers include pitch.'
+            : 'Every note stays the same height. You only name the letter.'}
+        </p>
+        {mix && (
+          <div className="chip-row">
+            {[2, 3, 4, 5].map((octave) => (
+              <Chip key={octave} active={octaves.includes(octave)} onClick={() => toggleOctave(octave)}>
+                {octave === 3 ? 'Low' : octave === 4 ? 'Middle' : octave === 5 ? 'High' : 'Very low'} {octave}
+              </Chip>
+            ))}
+          </div>
+        )}
+      </section>
+
       <div className="chip-row">
-        <button type="button" className={`chip ${mode === 'first' ? 'active' : ''}`} onClick={() => setMode('first')}>
+        <button type="button" className={`chip ${mode === 'first' ? 'active' : ''}`} onClick={() => switchMode('first')}>
           First note
         </button>
-        <button type="button" className={`chip ${mode === 'direction' ? 'active' : ''}`} onClick={() => setMode('direction')}>
+        <button type="button" className={`chip ${mode === 'direction' ? 'active' : ''}`} onClick={() => switchMode('direction')}>
           Higher / lower
         </button>
-        <button type="button" className={`chip ${mode === 'sequence' ? 'active' : ''}`} onClick={() => setMode('sequence')}>
+        <button type="button" className={`chip ${mode === 'sequence' ? 'active' : ''}`} onClick={() => switchMode('sequence')}>
           Sequence
         </button>
       </div>
-      <PlayButton playing={false} replayed onClick={() => void play()} label="Play melody" />
+      <PlayButton playing={false} replayed onClick={() => void play()} label="Play phrase" />
       {mode === 'first' && (
-        <NoteChoices
-          options={progress.selectedNotes}
-          system={progress.settings.noteSystem}
-          tonic={progress.settings.tonicPitchClass}
-          onChoose={(name) => finish(name === phrase[0].name, `It started on ${phrase[0].name}.`)}
-        />
+        <>
+          <p className="question">
+            {askPitch && named
+              ? `You chose ${guessedLabel}. What pitch did you hear?`
+              : 'What is the first note?'}
+          </p>
+          {(!askPitch || !named || answered) && (
+            <NoteChoices
+              options={scaleNotes}
+              system={system}
+              tonic={tonic}
+              disabled={answered || (askPitch && Boolean(named))}
+              reveal={answered ? { selected: named ?? picked ?? undefined, expected: first.name } : undefined}
+              onChoose={(name) => {
+                if (askPitch) setNamed(name);
+                else finish(name === first.name, name);
+              }}
+            />
+          )}
+          {askPitch && named && (
+            <div className="choice-grid" role="group" aria-label="Pitch">
+              { [...octaves].sort((a, b) => a - b).map((octave, index) => {
+                const state = answered
+                  ? octave === first.octave
+                    ? 'correct'
+                    : picked === String(octave)
+                      ? 'wrong'
+                      : ''
+                  : '';
+                return (
+                  <button
+                    key={octave}
+                    type="button"
+                    className={`choice ${state}`}
+                    disabled={answered}
+                    onClick={() => finish(named === first.name && octave === first.octave, String(octave))}
+                  >
+                    <span className="choice-key">{index + 1}</span>
+                    {humanOctaveName(noteFromName(named, octave))}
+                    <small>
+                      {guessedLabel}
+                      {octave}
+                    </small>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {askPitch && named && !answered && (
+            <button type="button" className="ghost" onClick={() => setNamed(null)}>
+              Change note
+            </button>
+          )}
+        </>
       )}
       {mode === 'direction' && (
         <div className="choice-grid">
@@ -464,8 +630,9 @@ export function MelodyTraining({ go }: { go: Go }) {
             <button
               key={dir}
               type="button"
-              className="choice"
-              onClick={() => finish(dir === melodyDirection(phrase[0], phrase[1]), `The second note went ${melodyDirection(phrase[0], phrase[1])}.`)}
+              className={`choice ${picked === dir ? (dir === direction ? 'correct' : 'wrong') : ''} ${answered && dir === direction ? 'correct' : ''}`}
+              disabled={answered}
+              onClick={() => finish(dir === direction, dir)}
             >
               {dir}
             </button>
@@ -473,31 +640,63 @@ export function MelodyTraining({ go }: { go: Go }) {
         </div>
       )}
       {mode === 'sequence' && (
-        <div className="stack">
-          {sequences.map((seq) => (
-            <button key={seq} type="button" className="ghost" onClick={() => finish(seq === sequences[0], `The phrase was ${sequences[0]}.`)}>
-              {seq}
-            </button>
-          ))}
+        <div className="stack" role="group" aria-label="Phrase choices">
+          {choices.map((choice) => {
+            const label = formatPhraseLabel(choice.notes, display, askPitch);
+            const state = answered
+              ? choice.correct
+                ? 'correct'
+                : picked === choice.key
+                  ? 'wrong'
+                  : ''
+              : '';
+            const sameHeight = choice.notes.every((note) => note.octave === choice.notes[0]?.octave);
+            const band = octaveLabel(choice.notes[0]?.octave ?? 4);
+            const bandTitle = band === 'low' ? 'Low' : band === 'high' ? 'High' : 'Middle';
+            return (
+              <button
+                key={choice.key}
+                type="button"
+                className={`choice ${state}`}
+                disabled={answered}
+                onClick={() => finish(choice.correct, choice.key)}
+              >
+                {label}
+                {askPitch && sameHeight && <small>{bandTitle}</small>}
+              </button>
+            );
+          })}
         </div>
       )}
-      {done && (
-        <section className="feedback ok">
-          <p>{done}</p>
-          <button type="button" className="primary" onClick={() => go({ id: 'song' })}>
-            Try a song phrase
-          </button>
+      {answered && (
+        <section className={`feedback ${ok ? 'ok' : 'bad'}`}>
+          <p className="feedback-kicker">{ok ? 'Yes — that shape is in real music.' : 'Not quite. Hear it once more.'}</p>
+          <h2>{phrase.name}</h2>
+          <p>
+            {phrase.hint} The phrase was {phraseLabel}
+            {askPitch && heard.every((note) => note.octave === first.octave)
+              ? ` · ${humanOctaveName(first).split(' ')[0]}`
+              : ''}
+            .
+          </p>
+          <div className="row">
+            <button type="button" className="primary" onClick={nextPhrase}>
+              Next phrase
+            </button>
+            <button type="button" className="ghost" onClick={() => go({ id: 'song' })}>
+              Try a song
+            </button>
+          </div>
         </section>
+      )}
+      {!answered && (
+        <button type="button" className="ghost" onClick={nextPhrase}>
+          New phrase
+        </button>
       )}
     </main>
   );
 }
-
-const SONG_PITCHES = [
-  { id: 'low' as const, octave: 3, title: 'Low' },
-  { id: 'middle' as const, octave: 4, title: 'Middle' },
-  { id: 'high' as const, octave: 5, title: 'High' },
-];
 
 export function SongMode({ go }: { go: Go }) {
   const { progress, update } = useProgress();
