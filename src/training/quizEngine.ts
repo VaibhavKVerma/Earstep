@@ -1,4 +1,4 @@
-import { generateMusicalPhrase, MELODY_QUIZ_LENGTH } from '../music/phrases';
+import { generateMusicalPhrase, melodyQuizLengthFor } from '../music/phrases';
 import type { IntervalId } from '../music/intervals';
 import { midiToNote, noteFromName, notesInRange, type NoteName } from '../music/notes';
 import type { Difficulty, PracticeConfig, PracticeMode, QuizQuestion } from './types';
@@ -98,7 +98,7 @@ export function generateMelodyQuestions(config: PracticeConfig): QuizQuestion[] 
       notes,
       octaves,
       mixOctaves: mix,
-      length: MELODY_QUIZ_LENGTH,
+      length: melodyQuizLengthFor(i),
     });
     const first = phrase.notes[0] ?? noteFromName(notes[0], octaves[0] ?? 4);
     questions.push({

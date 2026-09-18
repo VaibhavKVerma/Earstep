@@ -6,7 +6,13 @@ import {
   type NoteName,
 } from './notes';
 
+export const MELODY_QUIZ_MIN_LENGTH = 4;
 export const MELODY_QUIZ_LENGTH = 10;
+export const MELODY_QUIZ_QUESTION_COUNT = MELODY_QUIZ_LENGTH - MELODY_QUIZ_MIN_LENGTH + 1;
+
+export function melodyQuizLengthFor(index: number): number {
+  return Math.min(MELODY_QUIZ_LENGTH, MELODY_QUIZ_MIN_LENGTH + Math.max(0, index));
+}
 
 export type Rng = () => number;
 

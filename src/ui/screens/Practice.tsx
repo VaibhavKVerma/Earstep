@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { InstrumentId, SoundSource } from '../../audio/AudioEngine';
 import { CHROMATIC_NAMES, NATURAL_NAMES, type NoteName } from '../../music/notes';
+import { MELODY_QUIZ_QUESTION_COUNT } from '../../music/phrases';
 import { adviseProgression, formatNoteSet, nextNaturalNote, noteAccuracy, rankedNotes } from '../../music/progression';
 import { buildJourney, uncelebratedMasteries } from '../../training/journey';
 import {
@@ -169,7 +170,7 @@ export function PracticeSetup({ go }: { go: Go }) {
           <button
             type="button"
             className="ghost"
-            onClick={() => start({ mode: 'melody', questionCount: 4 })}
+            onClick={() => start({ mode: 'melody', questionCount: MELODY_QUIZ_QUESTION_COUNT })}
             disabled={notes.length < 2}
           >
             Start melody quiz

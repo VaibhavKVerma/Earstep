@@ -1,4 +1,5 @@
 import { displayNameForNoteName } from '../../music/naming';
+import { MELODY_QUIZ_QUESTION_COUNT } from '../../music/phrases';
 import { NOTE_STAGES, adviseProgression, formatNoteSet, stageForNotes } from '../../music/progression';
 import { accuracyMap, setActiveLevel } from '../../persistence/store';
 import { buildJourney } from '../../training/journey';
@@ -23,7 +24,7 @@ const MODES: {
   { id: 'guitar', icon: '🎸', title: 'Find it on guitar', text: 'Hear it, then tap a fret.', screen: { id: 'guitar-find' } },
   { id: 'interval', icon: '↔', title: 'Intervals', text: 'How far apart are two notes?', screen: { id: 'intervals' } },
   { id: 'melody', icon: '♫', title: 'Melodies', text: 'Choose notes. Mix pitch if you want.', screen: { id: 'melody' } },
-  { id: 'melody-quiz', icon: '☰', title: 'Melody quiz', text: 'Name each note in a longer phrase.' },
+  { id: 'melody-quiz', icon: '☰', title: 'Melody quiz', text: 'Start with 4 notes, then grow to 10.' },
   { id: 'song', icon: '♬', title: 'Learn from songs', text: 'Name each note, then pick Low, Middle, or High.', screen: { id: 'song' } },
   { id: 'hear-sing-find', icon: '🎤', title: 'Hear → Sing → Find', text: 'Listen, hum, then find it.', screen: { id: 'hear-sing-find' } },
 ];
@@ -175,7 +176,7 @@ export function Home({ go }: { go: Go }) {
                         ...defaultConfig('melody', notes),
                         octaves: progress.selectedOctaves,
                         instrument: progress.settings.instrument,
-                        questionCount: 4,
+                        questionCount: MELODY_QUIZ_QUESTION_COUNT,
                         difficulty: notes.length <= 2 ? 'beginner' : 'easy',
                         mixOctaves: progress.settings.mixOctaves,
                       }),

@@ -83,8 +83,8 @@ describe('quiz engine', () => {
       mode: 'melody',
     });
     expect(questions).toHaveLength(6);
+    expect(questions.map((question) => question.melody?.length)).toEqual([4, 5, 6, 7, 8, 9]);
     for (const question of questions) {
-      expect(question.melody).toHaveLength(10);
       for (const note of question.melody ?? []) {
         expect(['C', 'D']).toContain(note.name);
         expect(note.octave).toBe(4);
@@ -106,9 +106,9 @@ describe('quiz engine', () => {
       mixOctaves: true,
     });
     expect(questions).toHaveLength(8);
+    expect(questions.map((question) => question.melody?.length)).toEqual([4, 5, 6, 7, 8, 9, 10, 10]);
     for (const question of questions) {
       expect(question.includePitch).toBe(true);
-      expect(question.melody).toHaveLength(10);
       expect(question.options).toEqual([...notes]);
       for (const note of question.melody ?? []) {
         expect(notes).toContain(note.name);

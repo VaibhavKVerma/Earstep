@@ -202,7 +202,7 @@ export function Training({
       <ProgressDots current={isMelody ? melodyProgress : index} total={isMelody ? totalMelodyNotes : questions.length} />
       <p className="muted">
         {isMelody
-          ? `Phrase ${index + 1} of ${questions.length} · Name each note, like note recognition.`
+          ? `Phrase ${index + 1} of ${questions.length} · ${melody.length} notes. Name each one.`
           : DIFFICULTY_PRESETS[config.difficulty].questionHint}
       </p>
 

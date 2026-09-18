@@ -4,6 +4,7 @@ import {
   buildPhraseChoices,
   formatPhraseLabel,
   generateMusicalPhrase,
+  melodyQuizLengthFor,
   phraseKey,
   scaleFromNotes,
   templatesForScale,
@@ -97,6 +98,10 @@ describe('musical phrases', () => {
     for (const choice of choices) {
       for (const note of choice.notes) expect(notes).toContain(note.name);
     }
+  });
+
+  it('ramps melody quiz length from four notes to ten', () => {
+    expect([0, 1, 2, 6, 7].map(melodyQuizLengthFor)).toEqual([4, 5, 6, 10, 10]);
   });
 
   it('can stretch a motif to a ten-note phrase', () => {
